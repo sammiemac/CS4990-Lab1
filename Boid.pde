@@ -1,7 +1,7 @@
 /// In this file, you will have to implement seek and waypoint-following
 /// The relevant locations are marked with "TODO"
 
-// This is a test comment to make sure the GitHub repo is working correctly
+// Okay, this is another test because I messed up the last time.
 
 class Crumb
 {
