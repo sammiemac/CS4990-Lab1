@@ -40,6 +40,7 @@ class Boid
      if (target != null)
      {  
         // TODO: Implement seek here
+        // TODO: Sam will implement the seek function.
      }
      
      // place crumbs, do not change     
