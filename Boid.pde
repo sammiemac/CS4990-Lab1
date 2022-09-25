@@ -40,6 +40,7 @@ class Boid
      if (target != null)
      {  
         // TODO: Implement seek here
+        kinematic.increaseSpeed(3*dt,100000*dt);
      }
      
      // place crumbs, do not change     
