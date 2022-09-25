@@ -26,6 +26,8 @@ class Boid
    float rotational_acceleration;
    KinematicMovement kinematic;
    PVector target;
+   // distance
+   float dist;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -35,12 +37,47 @@ class Boid
      this.rotational_acceleration = rotational_acceleration;
    }
 
+
    void update(float dt)
    {
      if (target != null)
      {  
         // TODO: Implement seek here
-        // TODO: Sam will implement the seek function.
+        
+        // Visual debug, draws a line between the boid and the target destination
+        line(target.x, target.y, kinematic.position.x, kinematic.position.y);
+        noFill();
+        circle(target.x, target.y, 25);
+        
+        // Length of adjacent side
+        float dx = kinematic.position.x - target.x;
+
+        // Length of opposite side
+        float dy = kinematic.position.y - target.y;
+        
+        // Angle to target
+        float angleTo = degrees(atan2(dy, dx));
+        angleTo = normalize_angle(angleTo - kinematic.heading);
+        println("Angle to Target: " + angleTo);
+        println("Kinematic Heading: " + kinematic.getHeading());
+        
+        // Hopefully this turns the boid lmao
+        if (angleTo > kinematic.getHeading()) {
+          kinematic.increaseSpeed(3*dt, 100000*dt);
+        } else if (angleTo < kinematic.getHeading()) {
+          kinematic.increaseSpeed(3*dt, -100000*dt);
+        }
+        
+        // Hopefully this stops the boid lmao
+        float updateDist = PVector.dist(target, kinematic.position);
+        println("Current Distance: " + updateDist);
+        if (updateDist < (dist * 0.25) && kinematic.speed > 0) {
+          kinematic.increaseSpeed(-15*dt, 0);
+        }
+        
+        
+        
+        //kinematic.increaseSpeed(3*dt,100000*dt);
      }
      
      // place crumbs, do not change     
@@ -85,9 +122,11 @@ class Boid
      triangle(xp, yp, x1p, y1p, x2p, y2p);
    } 
    
-   void seek(PVector target)
+   // added dist
+   void seek(PVector target, float dist)
    {
       this.target = target;
+      this.dist = dist;
       
    }
    

@@ -39,7 +39,9 @@ void mousePressed() {
      
      if (waypoints.size() == 0)
      {
-        billy.seek(target);
+        // Distance between target and boid when target is initiated
+        float dist = PVector.dist(target, billy.kinematic.position);
+        billy.seek(target, dist);
      }
      else
      {
