@@ -41,6 +41,7 @@ void mousePressed() {
      {
         // Distance between target and boid when target is initiated
         float dist = PVector.dist(target, billy.kinematic.position);
+        // added dist parameter
         billy.seek(target, dist);
      }
      else

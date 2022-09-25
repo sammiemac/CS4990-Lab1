@@ -26,7 +26,7 @@ class Boid
    float rotational_acceleration;
    KinematicMovement kinematic;
    PVector target;
-   // distance
+   // added distance
    float dist;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
@@ -74,8 +74,6 @@ class Boid
         if (updateDist < (dist * 0.25) && kinematic.speed > 0) {
           kinematic.increaseSpeed(-15*dt, 0);
         }
-        
-        
         
         //kinematic.increaseSpeed(3*dt,100000*dt);
      }
