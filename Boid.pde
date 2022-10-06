@@ -56,26 +56,39 @@ class Boid
         float dy = kinematic.position.y - target.y;
         
         // Angle to target
-        float angleTo = degrees(atan2(dy, dx));
-        angleTo = normalize_angle(angleTo - kinematic.heading);
+        float angleTo = atan2(dy, dx);
+        angleTo = normalize_angle_left_right(angleTo - kinematic.getHeading());
         println("Angle to Target: " + angleTo);
         println("Kinematic Heading: " + kinematic.getHeading());
         
-        // Hopefully this turns the boid lmao
-        if (angleTo > kinematic.getHeading()) {
-          kinematic.increaseSpeed(3*dt, 100000*dt);
-        } else if (angleTo < kinematic.getHeading()) {
-          kinematic.increaseSpeed(3*dt, -100000*dt);
-        }
-        
-        // Hopefully this stops the boid lmao
+        // Distance to target
         float updateDist = PVector.dist(target, kinematic.position);
-        println("Current Distance: " + updateDist);
-        if (updateDist < (dist * 0.25) && kinematic.speed > 0) {
-          kinematic.increaseSpeed(-15*dt, 0);
+        println("Current Distance: " + updateDist); 
+        
+        // Accelerate boid slower if too close to new target
+        if (updateDist < 30 || kinematic.getSpeed() == 0) {
+          if (angleTo < 0) {
+            kinematic.increaseSpeed(20*dt, 100000*dt);
+          } else if (angleTo > 0) {
+            kinematic.increaseSpeed(20*dt, -100000*dt);
+          }
+        }
+        else {
+          if (angleTo < 0) {
+            kinematic.increaseSpeed(50*dt, 100000*dt);
+          } else if (angleTo > 0) {
+            kinematic.increaseSpeed(50*dt, -100000*dt);
+          }
         }
         
-        //kinematic.increaseSpeed(3*dt,100000*dt);
+        // Slow down boid proportionally nearing arrival; stop near target
+        if ((updateDist < dist*0.15 || updateDist < 30) && kinematic.speed > 0) {
+          kinematic.increaseSpeed(-2*kinematic.getSpeed()*dt, 0);
+        }
+        if (updateDist < 1) {
+          kinematic.speed = 0;
+          kinematic.rotational_velocity = 0;
+        }
      }
      
      // place crumbs, do not change     
