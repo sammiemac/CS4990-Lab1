@@ -28,6 +28,9 @@ class Boid
    PVector target;
    // added distance
    float dist;
+   // added waypoints array and index
+   ArrayList<PVector> waypoints;
+   int waypointsIndex;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -81,13 +84,19 @@ class Boid
           }
         }
         
-        // Slow down boid proportionally nearing arrival; stop near target
-        if ((updateDist < dist*0.15 || updateDist < 30) && kinematic.speed > 0) {
+        // Slow down boid proportionally nearing arrival of current target; stop near final target        
+        if ((updateDist < dist*0.1 || updateDist < 40) && kinematic.speed > 0) {
           kinematic.increaseSpeed(-2*kinematic.getSpeed()*dt, 0);
         }
         if (updateDist < 1) {
-          kinematic.speed = 0;
-          kinematic.rotational_velocity = 0;
+          if (waypoints != null && (waypointsIndex < waypoints.size()-1)) {
+             target = waypoints.get(++waypointsIndex);
+             dist = PVector.dist(target, kinematic.position);
+          }
+          else {
+            kinematic.speed = 0;
+            kinematic.rotational_velocity = 0;
+          }
         }
      }
      
@@ -137,14 +146,16 @@ class Boid
    void seek(PVector target, float dist)
    {
       this.target = target;
-      this.dist = dist;
-      
+      this.dist = dist; 
    }
    
-   void follow(ArrayList<PVector> waypoints)
+   // added dist
+   void follow(ArrayList<PVector> waypoints, float dist)
    {
       // TODO: change to follow *all* waypoints
+      this.waypointsIndex = 0;
       this.target = waypoints.get(0);
-      
+      this.dist = dist;
+      this.waypoints = waypoints; 
    }
 }
