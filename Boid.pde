@@ -26,6 +26,11 @@ class Boid
    float rotational_acceleration;
    KinematicMovement kinematic;
    PVector target;
+   // added distance
+   float dist;
+   // added waypoints array and index
+   ArrayList<PVector> waypoints;
+   int waypointsIndex;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -35,12 +40,65 @@ class Boid
      this.rotational_acceleration = rotational_acceleration;
    }
 
+
    void update(float dt)
    {
      if (target != null)
      {  
         // TODO: Implement seek here
-        kinematic.increaseSpeed(3*dt,100000*dt);
+
+        // Visual debug, draws a line between the boid and the target destination
+        line(target.x, target.y, kinematic.position.x, kinematic.position.y);
+        noFill();
+        circle(target.x, target.y, 25);
+        
+        // Length of adjacent side
+        float dx = kinematic.position.x - target.x;
+
+        // Length of opposite side
+        float dy = kinematic.position.y - target.y;
+        
+        // Angle to target
+        float angleTo = atan2(dy, dx);
+        angleTo = normalize_angle_left_right(angleTo - kinematic.getHeading());
+        println("Angle to Target: " + angleTo);
+        println("Kinematic Heading: " + kinematic.getHeading());
+        
+        // Distance to target
+        float updateDist = PVector.dist(target, kinematic.position);
+        println("Current Distance: " + updateDist); 
+        
+        // Accelerate boid slower if too close to new target
+        if (updateDist < 30 || kinematic.getSpeed() == 0) {
+          if (angleTo < 0) {
+            kinematic.increaseSpeed(20*dt, 100000*dt);
+          } else if (angleTo > 0) {
+            kinematic.increaseSpeed(20*dt, -100000*dt);
+          }
+        }
+        else {
+          if (angleTo < 0) {
+            kinematic.increaseSpeed(50*dt, 100000*dt);
+          } else if (angleTo > 0) {
+            kinematic.increaseSpeed(50*dt, -100000*dt);
+          }
+        }
+        
+        // Slow down boid proportionally nearing arrival of current target; stop near final target        
+        if ((updateDist < dist*0.1 || updateDist < 40) && kinematic.speed > 0) {
+          kinematic.increaseSpeed(-2*kinematic.getSpeed()*dt, 0);
+        }
+        if (updateDist < 1) {
+          if (waypoints != null && (waypointsIndex < waypoints.size()-1)) {
+             target = waypoints.get(++waypointsIndex);
+             dist = PVector.dist(target, kinematic.position);
+          }
+          else {
+            kinematic.speed = 0;
+            kinematic.rotational_velocity = 0;
+          }
+        }
+        //kinematic.increaseSpeed(3*dt,100000*dt);
      }
      
      // place crumbs, do not change     
@@ -85,16 +143,20 @@ class Boid
      triangle(xp, yp, x1p, y1p, x2p, y2p);
    } 
    
-   void seek(PVector target)
+   // added dist
+   void seek(PVector target, float dist)
    {
       this.target = target;
-      
+      this.dist = dist; 
    }
    
-   void follow(ArrayList<PVector> waypoints)
+   // added dist
+   void follow(ArrayList<PVector> waypoints, float dist)
    {
       // TODO: change to follow *all* waypoints
+      this.waypointsIndex = 0;
       this.target = waypoints.get(0);
-      
+      this.dist = dist;
+      this.waypoints = waypoints; 
    }
 }

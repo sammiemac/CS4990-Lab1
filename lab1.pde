@@ -39,13 +39,26 @@ void mousePressed() {
      
      if (waypoints.size() == 0)
      {
-        billy.seek(target);
+        // Distance between target and boid when target is initiated
+        float dist = PVector.dist(target, billy.kinematic.position);
+        // added dist parameter
+        billy.seek(target, dist);
      }
      else
      {
-        waypoints.add(target);
+        // Distance between target and boid when target is initiated
+        float dist = PVector.dist(target, billy.kinematic.position);
         entering_path = false;
-        billy.follow(waypoints);
+        // clears array when new target is made during follow()
+        if (billy.kinematic.getSpeed() > 0) {
+          waypoints.clear();
+          billy.seek(target, dist);
+        }
+        else {
+          waypoints.add(target);
+          // added dist parameter
+          billy.follow(waypoints, dist);
+        }
      }
   }
   else if (mouseButton == RIGHT)
