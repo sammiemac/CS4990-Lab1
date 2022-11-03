@@ -25,9 +25,15 @@ class NavMesh
    void bake(Map map)
    {
        /// generate the graph you need for pathfinding
+       
+       // clears reflex ArrayList
        reflex.clear();
+       // clears edge ArrayList
        edge.clear();
-       ArrayList<Wall> pts = map.walls;
+       
+       ArrayList<Wall> pts = map.outline;
+       
+       // checks if the angle at the node is reflex, if it is, add to the reflext ArrayList
        for (int i = 0; i < pts.size(); i++)
        {
          if (pts.get(i).normal.dot(pts.get((i+1)%pts.size()).direction) > 0)
@@ -37,14 +43,45 @@ class NavMesh
          }
        }
        
-       for (int i = 0; i < reflex.size(); i++)
+       //// if the edge from the reflex to the map.start node doesn't cross the map's walls, adds the edge to the ArrayList
+       //for (int i = 0; i < pts.size(); i++)
+       //{
+       //  for (int j = 0; j < reflex.size(); j++)
+       //  {
+       //      // shrinkin temp wall so it doesn't get deteced by the collide function
+       //      Wall temp = new Wall(reflex.get(j), pts.get(i).start);
+       //      PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
+       //      PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
+       //      if (!map.collides(temp.start, temp.end)) // no edges get made?
+       //        edge.add(i, new Wall(reflex.get(j), pts.get(i).start));
+       //  }
+       //}
+       
+       // the following code below does draw some edges, but code doesn't seem to be working properly
+       // adds all edges from the reflex to the map.start node
+       for (int i = 0; i < pts.size(); i++)
        {
-         for (int j = 0; j < pts.size(); j++)
+         for (int j = 0; j < reflex.size(); j++)
          {
-           if (!map.collides(reflex.get(i), pts.get(j).start))
+           edge.add(i, new Wall(reflex.get(j), pts.get(i).start));
+         }
+       }
+       
+       // checks if the edges crosses the map's wall, if it does, remove the edge
+       for (int i = 0; i < pts.size(); i++)
+       {
+         for (int j = 0; j < edge.size(); j++)
+         {
+           Wall temp = edge.get(j);
+           PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
+           PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
+         
+           if (temp.crosses(pts.get(i).start, pts.get(i).end))
            {
-             println("I added a wall!");
-             edge.add(new Wall(reflex.get(i), pts.get(j).end));
+             edge.remove(j);
+             println("removed edge");
+             println("new size: " + edge.size());
+             //i = 0;
            }
          }
        }

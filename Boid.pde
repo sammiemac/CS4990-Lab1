@@ -61,12 +61,12 @@ class Boid
         // Angle to target
         float angleTo = atan2(dy, dx);
         angleTo = normalize_angle_left_right(angleTo - kinematic.getHeading());
-        println("Angle to Target: " + angleTo);
-        println("Kinematic Heading: " + kinematic.getHeading());
+        //println("Angle to Target: " + angleTo);
+        //println("Kinematic Heading: " + kinematic.getHeading());
         
         // Distance to target
         float updateDist = PVector.dist(target, kinematic.position);
-        println("Current Distance: " + updateDist); 
+        //println("Current Distance: " + updateDist); 
         
         // Accelerate boid slower if too close to new target
         if (updateDist < 30 || kinematic.getSpeed() == 0) {
