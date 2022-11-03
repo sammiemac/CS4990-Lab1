@@ -1,10 +1,9 @@
 // Useful to sort lists by a custom key
 import java.util.Comparator;
 
+// In this file you will implement your navmesh and pathfinding. 
 
-/// In this file you will implement your navmesh and pathfinding. 
-
-/// This node representation is just a suggestion
+// This node representation is just a suggestion
 class Node
 {
    int id;
@@ -24,7 +23,7 @@ class NavMesh
   
    void bake(Map map)
    {
-       /// generate the graph you need for pathfinding
+       // generate the graph you need for pathfinding
        
        // clears reflex ArrayList
        reflex.clear();
