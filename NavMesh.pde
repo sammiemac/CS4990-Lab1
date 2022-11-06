@@ -18,99 +18,63 @@ class Node
 class NavMesh
 {   
   
-  ArrayList<PVector> reflex = new ArrayList<PVector>();
-  ArrayList<Integer> indices = new ArrayList<Integer>();
-  ArrayList<Wall> edge = new ArrayList<Wall>();
+  ArrayList<PVector> reflex = new ArrayList<PVector>(); // holds reflex vertices
+  ArrayList<Integer> indices = new ArrayList<Integer>(); // holds indices of map's vertices that are reflex
+  ArrayList<Wall> edges = new ArrayList<Wall>(); // holds new edges of nav mesh
+  ArrayList<Wall> perimeter = map.outline; // holds map outline
   
    void bake(Map map)
    {
        // generate the graph you need for pathfinding
        
-       // clears reflex ArrayList
+       // resets nav mesh whenever new map is generated
        reflex.clear();
-       // clears indices ArrayList
        indices.clear();
-       // clears edge ArrayList
-       edge.clear();
-       
-       ArrayList<Wall> pts = map.outline;
+       edges.clear();
        
        // checks if the angle at the node is reflex, if it is, add to the reflex ArrayList
-       for (int i = 0; i < pts.size(); i++)
+       for (int i = 0; i < perimeter.size(); i++)
        {
-         if (pts.get(i).normal.dot(pts.get((i+1)%pts.size()).direction) > 0)
+         if (perimeter.get(i).normal.dot(perimeter.get((i+1)%perimeter.size()).direction) > 0)
          {
-           PVector point = pts.get(i).end;
+           PVector point = perimeter.get(i).end;
            reflex.add(point);
            indices.add(i + 1);
          }
        }
        
-       //// if the edge from the reflex to the map.start node doesn't cross the map's walls, adds the edge to the ArrayList
-       //for (int i = 0; i < pts.size(); i++)
-       //{
-       //  for (int j = 0; j < reflex.size(); j++)
-       //  {
-       //      // shrinkin temp wall so it doesn't get deteced by the collide function
-       //      Wall temp = new Wall(reflex.get(j), pts.get(i).start);
-       //      PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
-       //      PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
-       //      if (!map.collides(temp.start, temp.end)) // no edges get made?
-       //        edge.add(i, new Wall(reflex.get(j), pts.get(i).start));
-       //  }
-       //}
-       
        // if all conditions are met, add edge from reflex point to outline vertices
        for (int i = 0; i < reflex.size(); i++)
        {
-         for (int j = 0; j < pts.size(); j++)
+         for (int j = 0; j < perimeter.size(); j++)
          {
            // disregards neighbors of reflex
            if (j == indices.get(i) + 1 || j == indices.get(i) - 1)
              continue;
            else
            {
-             Wall temp = new Wall(reflex.get(i), pts.get(j).start);
+             Wall temp = new Wall(reflex.get(i), perimeter.get(j).start);
              temp.start = PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
              temp.end = PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
              // checks if temp will collide with wall and is within map
-             if (!map.collides(temp.start, temp.end) && isPointInPolygon(temp.center(), pts))
+             if (!map.collides(temp.start, temp.end) && isPointInPolygon(temp.center(), perimeter))
              {
                // checks if edge will collide with other edges, removes unnecessary edges
                boolean intersectsNavMesh = false;
-               for (int k = 0; k < edge.size(); k++)
+               for (int k = 0; k < edges.size(); k++)
                {
-                 if (temp.crosses(edge.get(k).start, edge.get(k).end))
+                 if (temp.crosses(edges.get(k).start, edges.get(k).end))
                  {
                    intersectsNavMesh = true;
                    break;
                  }
                }
                if (!intersectsNavMesh)
-                 edge.add(i, temp);
+                 edges.add(i, temp);
              }
            }
          }
        }
-       
-       //// checks if the edges crosses the map's wall, if it does, remove the edge
-       //for (int i = 0; i < pts.size(); i++)
-       //{
-       //  for (int j = 0; j < edge.size(); j++)
-       //  {
-       //    Wall temp = edge.get(j);
-       //    temp.start = PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
-       //    temp.end = PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
-         
-       //    if (temp.crosses(pts.get(i).start, pts.get(i).end))
-       //    {
-       //      edge.remove(j);
-       //      println("removed edge");
-       //      println("new size: " + edge.size());
-       //      //i = 0;
-       //    }
-       //  }
-       //}
    }
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
@@ -133,7 +97,7 @@ class NavMesh
        fill(0, 255, 100);
        circle(w.x, w.y, 10);
      }
-     for (Wall w : edge) {
+     for (Wall w : edges) {
       w.draw();
      }
    }
