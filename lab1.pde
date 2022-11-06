@@ -46,6 +46,8 @@ void mousePressed() {
      }
      else
      {
+        if (billy.kinematic.speed == 0 && entering_path == false)
+          waypoints.clear();
         // Distance between target and boid when target is initiated
         float dist = PVector.dist(target, billy.kinematic.position);
         entering_path = false;
@@ -61,7 +63,7 @@ void mousePressed() {
         }
      }
   }
-  else if (mouseButton == RIGHT)
+  else if (mouseButton == RIGHT && billy.kinematic.speed == 0)
   {
      if (!entering_path)
         waypoints = new ArrayList<PVector>();

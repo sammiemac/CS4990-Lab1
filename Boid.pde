@@ -1,8 +1,6 @@
 /// In this file, you will have to implement seek and waypoint-following
 /// The relevant locations are marked with "TODO"
 
-// Okay, this is another test because I messed up the last time.
-
 class Crumb
 {
   PVector position;
@@ -26,9 +24,8 @@ class Boid
    float rotational_acceleration;
    KinematicMovement kinematic;
    PVector target;
-   // added distance
+   // added distance, waypoints array, and index
    float dist;
-   // added waypoints array and index
    ArrayList<PVector> waypoints;
    int waypointsIndex;
    
@@ -68,6 +65,8 @@ class Boid
         float updateDist = PVector.dist(target, kinematic.position);
         //println("Current Distance: " + updateDist); 
         
+        // The following section covers takeoff from current location to target
+        
         // Accelerate boid slower if too close to new target
         if (updateDist < 30 || kinematic.getSpeed() == 0) {
           if (angleTo < 0) {
@@ -84,7 +83,16 @@ class Boid
           }
         }
         
-        // Slow down boid proportionally nearing arrival of current target; stop near final target        
+        // The following section covers arrival and deacceleration
+        
+        /*WIP OF DYNAMIC STOPPING*/
+        //if (waypoints != null || waypointsIndex != waypoints.size()) {
+        //  int tempIndex = (waypointsIndex + 1)%waypoints.size();
+        //  float angleNext = atan2(target.x - waypoints.get(tempIndex).x, target.y - waypoints.get(tempIndex).y);
+        //  angleNext = normalize_angle(angleNext - kinematic.getHeading());
+        //}
+        
+        // Slow down boid proportionally nearing arrival of current target; stop near final target  
         if ((updateDist < dist*0.1 || updateDist < 40) && kinematic.speed > 0) {
           kinematic.increaseSpeed(-2*kinematic.getSpeed()*dt, 0);
         }
