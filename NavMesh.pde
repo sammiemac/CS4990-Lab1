@@ -33,7 +33,12 @@ class Node
    }
 }
 
-
+class Polygon
+{
+  int id;
+  ArrayList<Wall> walls;
+  ArrayList<PVector> points;
+}
 
 class NavMesh
 {   
@@ -42,6 +47,8 @@ class NavMesh
   ArrayList<Integer> indices = new ArrayList<Integer>(); // holds indices of map's vertices that are reflex
   ArrayList<Wall> edges = new ArrayList<Wall>(); // holds new edges of nav mesh
   ArrayList<Wall> perimeter = map.outline; // holds map outline
+  ArrayList<Wall> allEdges = new ArrayList<Wall>(); // holds all the edges of the map (perimeter + edges)
+  ArrayList<PVector> allPoints = new ArrayList<PVector>(); // holds all the points of the map
   
    void bake(Map map)
    {
@@ -51,6 +58,8 @@ class NavMesh
        reflex.clear();
        indices.clear();
        edges.clear();
+       allEdges.clear();
+       allPoints.clear();
        
        // checks if the angle at the node is reflex, if it is, add to the reflex ArrayList
        for (int i = 0; i < perimeter.size(); i++)
@@ -95,6 +104,17 @@ class NavMesh
            }
          }
        }
+       
+       // adds the walls of the perimeter and the navmesh to allWalls
+       allEdges.addAll(perimeter);
+       allEdges.addAll(edges);
+       
+       // adds all the start points of each wall in allEdges to allPoints
+       for (int i = 0 ; i < allEdges.size(); i++)
+       {
+         allPoints.add(i, allEdges.get(i).start);
+       }
+       
    }
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
@@ -112,13 +132,26 @@ class NavMesh
    
    void draw()
    {
-     for (PVector w : reflex) {
+     
+     for (Wall w : edges)
+     {
+       stroke(150, 0, 255);
+       w.draw();
+     }
+     
+     for (PVector p : allPoints)
+     {
+       stroke(255, 0 , 150);
+       fill(255, 0, 100);
+       circle(p.x, p.y, 10);
+     }
+     
+     for (PVector w : reflex)
+     {
        stroke(0, 255 , 150);
        fill(0, 255, 100);
        circle(w.x, w.y, 10);
      }
-     for (Wall w : edges) {
-      w.draw();
-     }
+     
    }
 }
