@@ -11,6 +11,26 @@ class Node
    PVector center;
    ArrayList<Node> neighbors;
    ArrayList<Wall> connections;
+   
+   Node(int id, ArrayList<Wall> polygon, ArrayList<Node> neighbors)
+   {
+     this.id = id;
+     this.polygon = polygon;
+     this.neighbors = neighbors;
+     float xSum = 0;
+     float ySum = 0;
+     for (Wall w : polygon)
+     {
+       xSum += w.start.x + w.end.x;
+       ySum += w.start.y + w.end.y;
+     }
+     this.center = new PVector(xSum / polygon.size(), ySum / polygon.size());
+     for (int i = 0; i < neighbors.size(); i++)
+     {
+       Wall connect = new Wall(center, neighbors.get(i).center);
+       connections.add(i, connect);
+     }
+   }
 }
 
 
