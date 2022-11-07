@@ -99,6 +99,8 @@ class NavMesh
            if (counter >= perimeter.size())
              counter = 0;
            
+           temp = new Wall(reflex.get(i).pt, perimeter.get(counter).start);
+           
            //// disregards neighbors of reflex
            //if (j == reflex.get(i).id + 1 || j == reflex.get(i).id - 1)
            //  continue;
