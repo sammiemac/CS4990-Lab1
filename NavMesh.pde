@@ -124,6 +124,10 @@ class NavMesh
                  if (temp.crosses(edges.get(k).start, edges.get(k).end))
                  {
                    intersectsNavMesh = true;
+                   temp.start = reflex.get(i).pt;
+                   temp.end = perimeter.get(j).start;
+                   if (temp.start == edges.get(k).end)
+                     reflex.get(i).connections.add(temp);
                    break;
                  }
                }
@@ -176,13 +180,9 @@ class NavMesh
        ArrayList<Wall> polygon = new ArrayList<Wall>();
        
        for (int i = 0; i < reflex.size(); i++)
-       {
-         // moves the edge to the right of the reflex (perimeter wall) to the last index
-         //Wall temp = reflex.get(i).connections.get(0);
-         //reflex.get(i).connections.add(temp);
-         //reflex.get(i).connections.remove(0);
-         
+       {         
          // from each reflex point, make a polygon using the reflex point and the endpoints of the neighboring connections
+         println("Size of connections array: " + reflex.get(i).connections.size());
          for (int j = 0; j < reflex.get(i).connections.size() - 1; j++)
          {
             PVector[] nodes = {reflex.get(i).pt, reflex.get(i).connections.get(j).end, reflex.get(i).connections.get(j+1).end};
@@ -257,22 +257,22 @@ class NavMesh
      /*SHOWS EVERY POLYGON FROM A REFLEX VERTEX*/
      //for (Wall w : polygonCenter.get(0).polygon)
      //{
-     //  stroke(150, 150, 100);
+     //  stroke(255, 255, 50);
      //  w.draw();
      //}
      //stroke(0, 150 , 150);
      //fill(0, 255, 100);
      
      /*SHOWS ALL CONNECTIONS FROM A REFLEX VERTEX*/
-     for (Wall w : reflex.get(0).connections)
+     for (Wall w : reflex.get(2).connections)
      {
        stroke(150, 0, 100);
        w.draw();
      }
      
      /*SHOWS A SINGLE CONNECTION*/
-     stroke(0, 100, 100);
-     reflex.get(0).connections.get(0).draw();
+     //stroke(0, 100, 100);
+     //reflex.get(0).connections.get(0).draw();
      
      
      
