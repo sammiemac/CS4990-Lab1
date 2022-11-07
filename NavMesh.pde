@@ -119,22 +119,24 @@ class NavMesh
          }
        }
        
+       // moves the
+       ArrayList<Wall> polygon = new ArrayList<Wall>();
        for (int i = 0; i < reflex.size(); i++)
        {
          Wall temp = reflex.get(i).connections.get(1);
          reflex.get(i).connections.add(temp);
          reflex.get(i).connections.remove(1);
+         
+         for (int j = 0; j < reflex.get(i).connections.size() - 1; j++)
+         {
+            PVector[] nodes = {reflex.get(i).pt, reflex.get(i).connections.get(j).end, reflex.get(i).connections.get(j+1).end};
+            AddPolygon(polygon, nodes);
+         }
        }
        
        // adds the walls of the perimeter and the navmesh to allWalls
        allEdges.addAll(perimeter);
        allEdges.addAll(edges);
-       
-       for (int i = 0; i < allEdges.size(); i ++)
-       {
-         ArrayList<Wall> polygon;
-         
-       }
        
        // adds all the start points of each wall in allEdges to allPoints
        for (int i = 0 ; i < allEdges.size(); i++)
