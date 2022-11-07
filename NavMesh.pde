@@ -104,7 +104,7 @@ class NavMesh
        // checks if the angle at the node is reflex, if it is, add to the reflex ArrayList
        for (int i = 0; i < perimeter.size(); i++)
        {
-         points.add(new Point((i+1)%perimeter.size(), perimeter.get(i).start)); // add the current point to the array list
+         points.add(new Point((i+1)%perimeter.size(), perimeter.get(i).end)); // add the current point to the array list
          println("Point added: " + points.get(i).id);
          
          if (perimeter.get(i).normal.dot(perimeter.get((i+1)%perimeter.size()).direction) > 0)
@@ -279,15 +279,15 @@ class NavMesh
      //fill(0, 255, 100);
      
      /*SHOWS ALL CONNECTIONS FROM A REFLEX VERTEX*/
-     for (Edge e : reflex.get(0).connections)
+     for (Edge e : reflex.get(2).connections)
      {
        stroke(150, 0, 100);
        e.w.draw();
      }
      
      /*SHOWS A SINGLE CONNECTION*/
-     stroke(0, 100, 100);
-     reflex.get(0).connections.get(5).w.draw();
+     //stroke(0, 100, 100);
+     //reflex.get(0).connections.get(5).w.draw();
      
      /*SHOWS ALL THE VERTEX POINTS ON THE MAP*/
      for (Point pt : points)
