@@ -188,16 +188,16 @@ class NavMesh
        circle(reflex.get(i).pt.x, reflex.get(i).pt.y, 10);
      }
      
-     //for (Node n : polygonCenter)
+     //for (Node n : polygonCenter.get()
      //{
-     //  for (Wall w : n.polygon)
-     //  {
-     //    stroke(150, 150, 100);
-     //    w.draw();
-     //  }
-     //  stroke(0, 150 , 150);
-     //  fill(0, 255, 100);
-     //  circle(n.center.x, n.center.y, 10);
+       for (Wall w : polygonCenter.get(0).polygon)
+       {
+         stroke(150, 150, 100);
+         w.draw();
+       }
+       stroke(0, 150 , 150);
+       fill(0, 255, 100);
+       //circle(n.center.x, n.center.y, 10);
      //}
      
      //for (Wall w : reflex.get(0).connections)
@@ -206,8 +206,10 @@ class NavMesh
      //  w.draw();
      //}
      
-     stroke(150, 150, 100);
-     reflex.get(0).connections.get(2).draw();
+     
+     
+     //stroke(150, 150, 100);
+     //reflex.get(0).connections.get(0).draw();
      
      //polygonCenter.get(1).polygon.draw();
      
