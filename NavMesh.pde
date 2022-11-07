@@ -39,11 +39,11 @@ class Reflex
   PVector pt; // location of reflex
   ArrayList<Wall> connections = new ArrayList<Wall>();
   
-  Reflex(int id, PVector pt, ArrayList<Wall> connections)
+  Reflex(int id, PVector pt)
   {
     this.id = id;
     this.pt = pt;
-    this.connections = connections;
+    //this.connections = connections;
   }
 }
 
@@ -76,26 +76,42 @@ class NavMesh
          if (perimeter.get(i).normal.dot(perimeter.get((i+1)%perimeter.size()).direction) > 0)
          {
            PVector point = perimeter.get(i).end;
-           ArrayList<Wall> walls = new ArrayList<Wall>();
-           Wall temp = new Wall(point, perimeter.get(i).start);
-           walls.add(temp);
-           temp = new Wall(point, perimeter.get(i+1).end);
-           walls.add(temp); 
-           reflex.add(new Reflex(i+1, point, walls));
+           //ArrayList<Wall> walls = new ArrayList<Wall>();
+           //Wall temp = new Wall(point, perimeter.get(i).start);
+           //walls.add(temp);
+           //temp = new Wall(point, perimeter.get(i+1).end);
+           //walls.add(temp); 
+           reflex.add(new Reflex(i+1, point));
          }
        }
        
        // if all conditions are met, add edge from reflex point to outline vertices
+       Wall temp;
        for (int i = 0; i < reflex.size(); i++)
        {
-         for (int j = 0; j < perimeter.size(); j++)
+         println("Started loop");
+         for (int j = reflex.get(i).id + 1; j != reflex.get(i).id;)
          {
-           // disregards neighbors of reflex
-           if (j == reflex.get(i).id + 1 || j == reflex.get(i).id - 1)
+           if (j == (reflex.get(i).id + 1) % perimeter.size())
+           {
+             println("We are at the next neighbor of reflex");
+             temp = new Wall(reflex.get(i).pt, perimeter.get(j).start);
+             reflex.get(i).connections.add(temp);
+             j = (j+1)%perimeter.size();
              continue;
+           }
+           else if (j == (reflex.get(i).id - 1) % perimeter.size())
+           {
+             println("We are at the previous neighbor of reflex");
+             temp = new Wall(perimeter.get(j).start, reflex.get(i).pt);
+             reflex.get(i).connections.add(temp);
+             j = (j+1)%perimeter.size();
+             continue;
+           }
            else
            {
-             Wall temp = new Wall(reflex.get(i).pt, perimeter.get(j).start);
+             println("We are trying to make a wall");
+             temp = new Wall(reflex.get(i).pt, perimeter.get(j).start);
              temp.start = PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
              temp.end = PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
              // checks if temp will collide with wall and is within map
@@ -113,13 +129,49 @@ class NavMesh
                }
                if (!intersectsNavMesh)
                {
-                 edges.add(i, temp);
+                 edges.add(temp);
                  reflex.get(i).connections.add(temp);
                }
              }
+             j = (j+1)%perimeter.size();
            }
          }
        }
+       
+       //for (int i = 0; i < reflex.size(); i++)
+       //{
+       //  for (int j = 0; j < perimeter.size(); j++)
+       //  {
+       //    // disregards neighbors of reflex
+       //    if (j == reflex.get(i).id + 1 || j == reflex.get(i).id - 1)
+       //      continue;
+       //    else
+       //    {
+       //      Wall temp = new Wall(reflex.get(i).pt, perimeter.get(j).start);
+       //      temp.start = PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
+       //      temp.end = PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
+       //      // checks if temp will collide with wall and is within map
+       //      if (!map.collides(temp.start, temp.end) && isPointInPolygon(temp.center(), perimeter))
+       //      {
+       //        // checks if edge will collide with other edges, removes unnecessary edges
+       //        boolean intersectsNavMesh = false;
+       //        for (int k = 0; k < edges.size(); k++)
+       //        {
+       //          if (temp.crosses(edges.get(k).start, edges.get(k).end))
+       //          {
+       //            intersectsNavMesh = true;
+       //            break;
+       //          }
+       //        }
+       //        if (!intersectsNavMesh)
+       //        {
+       //          edges.add(i, temp);
+       //          reflex.get(i).connections.add(temp);
+       //        }
+       //      }
+       //    }
+       //  }
+       //}
        
        ArrayList<Wall> polygon = new ArrayList<Wall>();
        
@@ -212,11 +264,15 @@ class NavMesh
      //fill(0, 255, 100);
      
      /*SHOWS ALL CONNECTIONS FROM A REFLEX VERTEX*/
-     //for (Wall w : reflex.get(0).connections)
-     //{
-     //  stroke(150, 0, 100);
-     //  w.draw();
-     //}
+     for (Wall w : reflex.get(0).connections)
+     {
+       stroke(150, 0, 100);
+       w.draw();
+     }
+     
+     /*SHOWS A SINGLE CONNECTION*/
+     stroke(0, 100, 100);
+     reflex.get(0).connections.get(0).draw();
      
      
      
