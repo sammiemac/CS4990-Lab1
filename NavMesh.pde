@@ -12,24 +12,24 @@ class Node
    ArrayList<Node> neighbors;
    ArrayList<Wall> connections;
    
-   Node(int id, ArrayList<Wall> polygon, ArrayList<Node> neighbors)
+   Node(int id, ArrayList<Wall> polygon)
    {
      this.id = id;
      this.polygon = polygon;
-     this.neighbors = neighbors;
+     //this.neighbors = neighbors;
      float xSum = 0;
      float ySum = 0;
      for (Wall w : polygon)
      {
-       xSum += w.start.x + w.end.x;
-       ySum += w.start.y + w.end.y;
+       xSum += w.start.x;
+       ySum += w.start.y;
      }
      this.center = new PVector(xSum / polygon.size(), ySum / polygon.size());
-     for (int i = 0; i < neighbors.size(); i++)
-     {
-       Wall connect = new Wall(center, neighbors.get(i).center);
-       connections.add(i, connect);
-     }
+     //for (int i = 0; i < neighbors.size(); i++)
+     //{
+     //  Wall connect = new Wall(center, neighbors.get(i).center);
+     //  connections.add(i, connect);
+     //}
    }
 }
 
@@ -56,6 +56,7 @@ class NavMesh
   ArrayList<Wall> perimeter = map.outline; // holds map outline
   ArrayList<Wall> allEdges = new ArrayList<Wall>(); // holds all the edges of the map (perimeter + edges)
   ArrayList<PVector> allPoints = new ArrayList<PVector>(); // holds all the points of the map
+  ArrayList<Node> polygonCenter = new ArrayList<Node>(); // holds polygons and nodes
   
    void bake(Map map)
    {
@@ -67,6 +68,7 @@ class NavMesh
        edges.clear();
        allEdges.clear();
        allPoints.clear();
+       polygonCenter.clear();
        
        // checks if the angle at the node is reflex, if it is, add to the reflex ArrayList
        for (int i = 0; i < perimeter.size(); i++)
@@ -75,9 +77,9 @@ class NavMesh
          {
            PVector point = perimeter.get(i).end;
            ArrayList<Wall> walls = new ArrayList<Wall>();
-           Wall temp = new Wall(point, perimeter.get(i+1).start);
+           Wall temp = new Wall(point, perimeter.get(i).start);
            walls.add(temp);
-           temp = new Wall(point, perimeter.get(i-1).start);
+           temp = new Wall(point, perimeter.get(i+1).end);
            walls.add(temp); 
            reflex.add(new Reflex(i+1, point, walls));
          }
@@ -119,18 +121,22 @@ class NavMesh
          }
        }
        
-       // moves the
        ArrayList<Wall> polygon = new ArrayList<Wall>();
+       
        for (int i = 0; i < reflex.size(); i++)
        {
-         Wall temp = reflex.get(i).connections.get(1);
-         reflex.get(i).connections.add(temp);
-         reflex.get(i).connections.remove(1);
+         // moves the edge to the right of the reflex (perimeter wall) to the last index
+         //Wall temp = reflex.get(i).connections.get(0);
+         //reflex.get(i).connections.add(temp);
+         //reflex.get(i).connections.remove(0);
          
+         // from each reflex point, make a polygon using the reflex point and the endpoints of the neighboring connections
          for (int j = 0; j < reflex.get(i).connections.size() - 1; j++)
          {
             PVector[] nodes = {reflex.get(i).pt, reflex.get(i).connections.get(j).end, reflex.get(i).connections.get(j+1).end};
             AddPolygon(polygon, nodes);
+            Node node = new Node(0, polygon);
+            polygonCenter.add(j, node);
          }
        }
        
@@ -181,6 +187,29 @@ class NavMesh
        fill(0, 255, 100);
        circle(reflex.get(i).pt.x, reflex.get(i).pt.y, 10);
      }
+     
+     //for (Node n : polygonCenter)
+     //{
+     //  for (Wall w : n.polygon)
+     //  {
+     //    stroke(150, 150, 100);
+     //    w.draw();
+     //  }
+     //  stroke(0, 150 , 150);
+     //  fill(0, 255, 100);
+     //  circle(n.center.x, n.center.y, 10);
+     //}
+     
+     //for (Wall w : reflex.get(0).connections)
+     //{
+     //  stroke(150, 150, 100);
+     //  w.draw();
+     //}
+     
+     stroke(150, 150, 100);
+     reflex.get(0).connections.get(2).draw();
+     
+     //polygonCenter.get(1).polygon.draw();
      
    }
 }
