@@ -57,6 +57,18 @@ class Point
   
 }
 
+class PointCompare implements Comparator<Point>
+{
+
+  int compare(Point a, Point b)
+  {
+     if (a.id < b.id) return -1;
+     if (a.id > b.id) return 1;
+     return 0;
+  }
+  
+}
+
 class Edge
 {
 
@@ -96,24 +108,28 @@ class NavMesh
        edges.clear();
        polygonCenter.clear();
        
-
        // checks if the angle at the node is reflex, if it is, add to the reflex ArrayList
        for (int i = 0; i < perimeter.size(); i++)
        {
-         if (i+1 == perimeter.size()-1)
-           points.add(new Point(0, perimeter.get(i).start));
-         else
-           points.add(new Point(i+1, perimeter.get(i).start)); // add the current point to the array list
-         println("Point added at: " + (i+1));
+         points.add(new Point((i+1)%perimeter.size(), perimeter.get(i).start)); // add the current point to the array list
+         println("Point added: " + points.get(i).id);
          
          if (perimeter.get(i).normal.dot(perimeter.get((i+1)%perimeter.size()).direction) > 0)
          {
            PVector pt = perimeter.get(i).end;
            reflex.add(new Point(i+1, pt));
-           println("Reflex at: " + (i+1));
+           println("Reflex at: " + points.get(i).id);
          }
        }
        println("Amount of points: " + points.size());
+       
+       println("Before sort:");
+       for (Point p : points) print(p.id + " ");
+       points.sort(new PointCompare());
+       println("\nAfter sort");
+       for (Point p : points) print(p.id + " ");
+       println();
+       
        
        // edge generation
        // if all conditions are met, add edge from reflex point to outline vertices
