@@ -40,19 +40,12 @@ class Point
   
   int id; // holds the id of the point
   PVector pt; // holds the location of the point
-  ArrayList<Wall> connections = new ArrayList<Wall>(); // holds the connections from this point
+  ArrayList<Edge> connections = new ArrayList<Edge>(); // holds the connections from this point
   
   Point(int id, PVector pt)
   {
     this.id = id;
     this.pt = pt;
-  }
-  
-  Point(int id, PVector pt, ArrayList<Wall> c)
-  {
-    this.id = id;
-    this.pt = pt;
-    this.connections = c;
   }
   
 }
@@ -133,46 +126,43 @@ class NavMesh
        
        // edge generation
        // if all conditions are met, add edge from reflex point to outline vertices
-       Edge temp;
        Point tempstart;
        Point tempend;
+       Edge temp;
        for (int i = 0; i < reflex.size(); i++) // i = index of reflex
        {
-         println("Started loop");
+         println("\nStarted loop");
          println("At reflex: " + reflex.get(i).id);
-         for (int j = reflex.get(i).id + 1; j != reflex.get(i).id;) // j = index of perimeter
+         for (int j = reflex.get(i).id + 1; j != reflex.get(i).id;) // j = index of points
          {
-           println("Looking at: " + j);
+           println("At reflex: " + reflex.get(i).id + ", Looking at: " + points.get(j).id);
            
            // checks if we are at the neighbor of the current reflex 
            // if we are, don't make an edge but add a connection to the reflex
-           if (j == (reflex.get(i).id + 1) % perimeter.size())
+           if (j == (reflex.get(i).id + 1) % points.size() || j == (reflex.get(i).id - 1) % perimeter.size())
            {
-             println("We are at the next neighbor of reflex");
-             tempstart = new Point(reflex.get(i).id, reflex.get(i).pt); // the current reflex
-             tempend = new Point(points.get(j).id, points.get(j).pt); // the next point
-             temp = new Edge(j, tempstart, tempend);
-             reflex.get(i).connections.add(temp.w);
+             println("We are at the neighbor of reflex");
+             // start = current reflex, end = reflex neighbor
+             reflex.get(i).connections.add(new Edge(j, new Point(reflex.get(i).id, reflex.get(i).pt), new Point(points.get(j).id, points.get(j).pt)));
              println("Connection made");
              j = (j+1)%perimeter.size();
              continue;
            }
-           else if (j == (reflex.get(i).id - 1) % perimeter.size())
-           {
-             println("We are at the previous neighbor of reflex");
-             tempstart = new Point(points.get(j).id, points.get(j).pt); // the previous point
-             tempend = new Point(reflex.get(i).id, reflex.get(i).pt); // the current reflex
-             temp = new Edge(j, tempstart, tempend);
-             reflex.get(i).connections.add(temp.w);
-             println("Connection made");
-             j = (j+1)%perimeter.size();
-             continue;
-           }
+           //else if (j == (reflex.get(i).id - 1) % perimeter.size())
+           //{
+           //  println("We are at the previous neighbor of reflex");
+           //  // start = previous neighbor, end = current reflex
+           //  reflex.get(i).connections.add(new Edge(j, new Point(points.get(j).id, points.get(j).pt), new Point(reflex.get(i).id, reflex.get(i).pt)));
+           //  println("Connection made");
+           //  j = (j+1)%perimeter.size();
+           //  continue;
+           //}
            else // if we are not at a neighbor, then we can try to make a wall
            {
+             boolean intersectsNavMesh = false;
              println("We are trying to make a wall");
              tempstart = new Point(reflex.get(i).id, reflex.get(i).pt); // the current reflex
-             tempend = new Point(points.get(j).id, points.get(j).pt); // the point we're trying to connect to, btw this is probably wrong
+             tempend = new Point(points.get(j).id, points.get(j).pt); // the point we're trying to connect to
              temp = new Edge(j, tempstart, tempend);
              
              // give the start and end points some clearance
@@ -182,7 +172,7 @@ class NavMesh
              if (!map.collides(temp.w.start, temp.w.end) && isPointInPolygon(temp.w.center(), perimeter))
              {
                // checks if edge will collide with other edges, removes unnecessary edges
-               boolean intersectsNavMesh = false;
+               
                for (int k = 0; k < edges.size(); k++) // k = index of edges
                {
                  if (temp.w.crosses(edges.get(k).start.pt, edges.get(k).end.pt))
@@ -190,7 +180,7 @@ class NavMesh
                    intersectsNavMesh = true;
                    if (temp.start.id == edges.get(k).end.id && temp.end.id == edges.get(k).start.id)
                    {
-                     reflex.get(i).connections.add(temp.w);
+                     reflex.get(i).connections.add(temp);
                      println("Same edge, connection made");
                    }
                    println("Crosses another edge, no edge made");
@@ -200,7 +190,7 @@ class NavMesh
                if (!intersectsNavMesh)
                {
                  edges.add(temp);
-                 reflex.get(i).connections.add(temp.w);
+                 reflex.get(i).connections.add(temp);
                  println("Meets conditions, edge and connection made");
                }   
              }
@@ -258,11 +248,11 @@ class NavMesh
        circle(p.pt.x, p.pt.y, 10);
      }
      
-     for (int i = 0; i < reflex.size(); i++)
+     for (Point r : reflex)
      {
        stroke(0, 255 , 150);
        fill(0, 255, 100);
-       circle(reflex.get(i).pt.x, reflex.get(i).pt.y, 10);
+       circle(r.pt.x, r.pt.y, 10);
      }
      
      ////for (Node n : polygonCenter.get()
@@ -289,15 +279,15 @@ class NavMesh
      //fill(0, 255, 100);
      
      /*SHOWS ALL CONNECTIONS FROM A REFLEX VERTEX*/
-     //for (Wall w : reflex.get(0).connections)
-     //{
-     //  stroke(150, 0, 100);
-     //  w.draw();
-     //}
+     for (Edge e : reflex.get(0).connections)
+     {
+       stroke(150, 0, 100);
+       e.w.draw();
+     }
      
      /*SHOWS A SINGLE CONNECTION*/
-     //stroke(0, 100, 100);
-     //reflex.get(0).connections.get(0).draw();
+     stroke(0, 100, 100);
+     reflex.get(0).connections.get(5).w.draw();
      
      /*SHOWS ALL THE VERTEX POINTS ON THE MAP*/
      for (Point pt : points)
