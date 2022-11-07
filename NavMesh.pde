@@ -188,21 +188,33 @@ class NavMesh
        circle(reflex.get(i).pt.x, reflex.get(i).pt.y, 10);
      }
      
-     //for (Node n : polygonCenter.get()
-     //{
-       for (Wall w : polygonCenter.get(0).polygon)
-       {
-         stroke(150, 150, 100);
-         w.draw();
-       }
-       stroke(0, 150 , 150);
-       fill(0, 255, 100);
-       //circle(n.center.x, n.center.y, 10);
-     //}
+     ////for (Node n : polygonCenter.get()
+     ////{
+     //  for (Wall w : polygonCenter.get(0).polygon)
+     //  {
+     //    stroke(150, 150, 100);
+     //    w.draw();
+     //  }
+     //  stroke(0, 150 , 150);
+     //  fill(0, 255, 100);
+     //  //circle(n.center.x, n.center.y, 10);
+     ////}
      
-     //for (Wall w : reflex.get(0).connections)
+     // DEBUGGING CODE
+     
+     /*SHOWS EVERY POLYGON FROM A REFLEX VERTEX*/
+     //for (Wall w : polygonCenter.get(0).polygon)
      //{
      //  stroke(150, 150, 100);
+     //  w.draw();
+     //}
+     //stroke(0, 150 , 150);
+     //fill(0, 255, 100);
+     
+     /*SHOWS ALL CONNECTIONS FROM A REFLEX VERTEX*/
+     //for (Wall w : reflex.get(0).connections)
+     //{
+     //  stroke(150, 0, 100);
      //  w.draw();
      //}
      
