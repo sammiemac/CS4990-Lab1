@@ -33,6 +33,48 @@ class Node
    }
 }
 
+class Point
+{
+  
+  int id; // holds the id of the point
+  PVector pt; // holds the location of the point
+  ArrayList<Edge> connections = new ArrayList<Edge>(); // holds the connections from this point
+  
+  Point(int id, PVector pt)
+  {
+    this.id = id;
+    this.pt = pt;
+  }
+}
+
+class Edge
+{
+
+  int id; // holds the id of the edge
+  int start; // holds the starting point that makes this edge
+  int end; // holds the ending point that makes this edge
+  Wall w; // holds the wall that creates this edge
+  
+  Edge(int id, Point start, Point end)
+  {
+    this.id = id;
+    this.start = start.id;
+    this.end = end.id;
+    this.w = new Wall(start.pt, end.pt);
+  } 
+}
+
+class PointCompare implements Comparator<Point>
+{
+
+  int compare(Point a, Point b)
+  {
+     if (a.id < b.id) return -1;
+     if (a.id > b.id) return 1;
+     return 0;
+  }  
+}
+
 class Reflex
 {
   int id; // id of reflex point
