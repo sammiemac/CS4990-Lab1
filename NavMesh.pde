@@ -1,5 +1,5 @@
 // Useful to sort lists by a custom key
-import java.util.Comparator;
+import java.util.*;
 
 // In this file you will implement your navmesh and pathfinding. 
 
@@ -7,15 +7,19 @@ import java.util.Comparator;
 class Node
 {
    int id;
-   ArrayList<PolygonEdgeInfo> polygon;
+   ArrayList<Wall> polygon;
+   ArrayList<Integer> cornerIDs;
    PVector center;
    ArrayList<Node> neighbors;
    ArrayList<Wall> connections;
    
-   Node(int id, ArrayList<Wall> polygon)
+   Node(int id, ArrayList<Wall> polygon, ArrayList<Integer> cornerIDs)
    {
      this.id = id;
      this.polygon = polygon;
+     this.cornerIDs = new ArrayList<Integer>();
+     for (Integer w : cornerIDs)
+       this.cornerIDs.add(w);
      float xSum = 0;
      float ySum = 0;
      for (Wall w : polygon)
@@ -24,17 +28,37 @@ class Node
        ySum += w.start.y;
      }
      this.center = new PVector(xSum / polygon.size(), ySum / polygon.size());
+     this.neighbors = new ArrayList<Node>();
+     this.connections = new ArrayList<Wall>();
    }
    
-   Node(ArrayList<Node> otherNodes)
+   void getNodeNeighbors(ArrayList<Node> otherNodes)
    {
-     this.neighbors = new ArrayList<Node>();
-     // for (int i = 0; i < otherNodes.size(); i++)
-     //     algo: if this node shares an edge with otherNodes.get(i), add that node to this.neighbors
-     for (int i = 0; i < neighbors.size(); i++)
+     int edgeNeighborCounter, point1, point2, point3, nextPoint1, nextPoint2, nextPoint3;
+     point1 = cornerIDs.get(0);
+     point2 = cornerIDs.get(1);
+     point3 = cornerIDs.get(2);
+     for (int i = 0; i < otherNodes.size(); i++)
      {
-       Wall connect = new Wall(center, neighbors.get(i).center);
-       connections.add(i, connect);
+       edgeNeighborCounter = 0;
+       if (i == this.id)
+         continue;
+       nextPoint1 = otherNodes.get(i).cornerIDs.get(0);
+       nextPoint2 = otherNodes.get(i).cornerIDs.get(1);
+       nextPoint3 = otherNodes.get(i).cornerIDs.get(2);
+       if (point1 == nextPoint1 || point1 == nextPoint2 || point1 == nextPoint3)
+         edgeNeighborCounter += 1;
+       if (point2 == nextPoint1 || point2 == nextPoint2 || point2 == nextPoint3)
+         edgeNeighborCounter += 1;
+       if (point3 == nextPoint1 || point3 == nextPoint2 || point3 == nextPoint3)
+         edgeNeighborCounter += 1;
+       if (edgeNeighborCounter == 2)
+         this.neighbors.add(0, (otherNodes.get((i)%otherNodes.size())));
+     }
+     for (int i = 0; i < this.neighbors.size(); i++)
+     {
+       Wall connect = new Wall(this.center, neighbors.get(i).center);
+       connections.add(connect);
      }
    }
 }
@@ -70,22 +94,6 @@ class EdgeInfo
   } 
 }
 
-class PolygonEdgeInfo
-{
-  int id; // holds the id of the edge
-  int start; // holds the starting point that makes this edge
-  int end; // holds the ending point that makes this edge
-  Wall wall; // holds the wall that creates this edge
-  
-  PolygonEdgeInfo(int id, PointInfo start, PointInfo end)
-  {
-    this.id = id;
-    this.start = start.id;
-    this.end = end.id;
-    this.wall = new Wall(start.pt, end.pt);
-  }
-}
-
 class PointCompare implements Comparator<PointInfo>
 {
 
@@ -95,6 +103,26 @@ class PointCompare implements Comparator<PointInfo>
      if (a.id > b.id) return 1;
      return 0;
   }  
+}
+
+void bubbleSort(int[] input)
+{
+  int n = input.length;
+  {
+    for (int i = 0; i < n - 1; i++)
+    {
+      for (int j = 0; j < n - i - 1; j++)
+      {
+        if (input[j] > input[j + 1])
+        {
+          // swap input[j+1] and input[j]
+          int temp = input[j];
+          input[j] = input[j + 1];
+          input[j + 1] = temp;
+        }
+      }
+    }
+  }
 }
 
 class NavMesh
@@ -119,28 +147,24 @@ class NavMesh
        for (int i = 0; i < perimeter.size(); i++)
        {
          allPoints.add(new PointInfo(i, perimeter.get(i).start)); // add the current point to the array list
-         println("Point added: " + allPoints.get(i).id);
          
          if (perimeter.get(i).normal.dot(perimeter.get((i+1)%perimeter.size()).direction) > 0)
          {
            PVector point = perimeter.get(i).end;
            reflex.add(new PointInfo(i+1, point));
-           println("Reflex at: " + allPoints.get(i).id);
          }
        }
-       println("Amount of points: " + allPoints.size());
        
        // if all conditions are met, add edge from reflex point to outline vertices
        int edgeCounter = 0;
        EdgeInfo temp;
        for (int i = 0; i < reflex.size(); i++)
        {
-         println("Started loop");
          for (int j = reflex.get(i).id + 1; j != reflex.get(i).id;)
          {
            if (j == (reflex.get(i).id + 1) % perimeter.size())
            {
-             println("We are at the next neighbor of reflex");
+             // We are at the next neighbor of reflex
              temp = new EdgeInfo(edgeCounter++, reflex.get(i), allPoints.get(j));
              reflex.get(i).connections.add(temp);
              j = (j+1)%perimeter.size();
@@ -148,7 +172,7 @@ class NavMesh
            }
            else if (j == (reflex.get(i).id - 1) % perimeter.size())
            {
-             println("We are at the previous neighbor of reflex");
+             // We are at the previous neighbor of reflex
              temp = new EdgeInfo(edgeCounter++, reflex.get(i), allPoints.get(j));
              reflex.get(i).connections.add(temp);
              j = (j+1)%perimeter.size();
@@ -156,7 +180,7 @@ class NavMesh
            }
            else
            {
-             println("We are trying to make a wall");
+             // We are trying to make a wall
              temp = new EdgeInfo(edgeCounter, reflex.get(i), allPoints.get(j));
              temp.wall.start = PVector.add(temp.wall.start, PVector.mult(temp.wall.direction, 0.01));
              temp.wall.end = PVector.add(temp.wall.end, PVector.mult(temp.wall.direction, -0.01));
@@ -189,32 +213,47 @@ class NavMesh
        
        /*MAKING POLYGON CODE*/
        int polygonCounter = 0;
-       ArrayList<PolygonEdgeInfo> polygon = new ArrayList<PolygonEdgeInfo>();
+       ArrayList<Wall> polygon = new ArrayList<Wall>();
+       ArrayList<Integer> nodeIDs = new ArrayList<Integer>();
+       ArrayList<int[]> listOfIDs = new ArrayList<int[]>();
+       boolean polygonExists = false;
        Node node;
        for (int i = 0; i < reflex.size(); i++)
        {        
          // from each reflex point, make a polygon using the reflex point and the endpoints of the neighboring connections
-         println("Size of connections array: " + reflex.get(i).connections.size());
          for (int j = 0; j < reflex.get(i).connections.size() - 1; j++)
          {
-            PointInfo[] nodes = {reflex.get(i), reflex.get(i).connections.get(j),
+            PVector[] nodes = {reflex.get(i).pt, reflex.get(i).connections.get(j).wall.end,
                                reflex.get(i).connections.get((j+1)%reflex.get(i).connections.size()).wall.end};
-            node = new Node(polygonCounter++, AddPolygon(polygon, nodes));
-            polygonNode.add(node);
+            int[] tempNodes = {reflex.get(i).id, reflex.get(i).connections.get(j).end, reflex.get(i).connections.get((j+1)%reflex.get(i).connections.size()).end};
+            bubbleSort(tempNodes);
+            listOfIDs.add(0, tempNodes);
+            for (int k = 1; k < listOfIDs.size(); k++)
+            {
+               if (Arrays.equals(tempNodes, listOfIDs.get(k)) && listOfIDs.size() != 1)
+               {
+                 polygonExists = true;
+                 listOfIDs.remove(k);
+                 break;
+               }
+            }
+            if (!polygonExists)
+            {
+              nodeIDs.add(tempNodes[0]);
+              nodeIDs.add(tempNodes[1]);
+              nodeIDs.add(tempNodes[2]);
+              AddPolygon(polygon, nodes);
+              node = new Node(polygonCounter++, polygon, nodeIDs);
+              polygonNode.add(node);
+            }
+            polygonExists = false;
             polygon.clear();
+            nodeIDs.clear();
          }
        }
        
-       //// adds the walls of the perimeter and the navmesh to allWalls
-       //allEdges.addAll(perimeter);
-       //allEdges.addAll(edges);
-       
-       //// adds all the start points of each wall in allEdges to allPoints
-       //for (int i = 0 ; i < allEdges.size(); i++)
-       //{
-       //  allPoints.add(i, allEdges.get(i).start);
-       //}
-       
+       for (int i = 0; i < polygonNode.size(); i++)
+         polygonNode.get(i).getNodeNeighbors(polygonNode);
    }
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
@@ -266,7 +305,13 @@ class NavMesh
        stroke(0, 150 , 150);
        fill(0, 255, 100);
        circle(n.center.x, n.center.y, 10);
+       for (Wall w : n.connections)
+       {
+         stroke(0, 255, 100);
+         w.draw();
+       }
      }
+     
      
      // DEBUGGING CODE
      
@@ -289,6 +334,14 @@ class NavMesh
      //  w.wall.draw();
      //}
      
+     /*SHOWS ALL CONNECTIONS FROM A POLYGON CENTER*/
+     //for (Wall w : polygonNode.get(0).connections)
+     //{
+     //  stroke(150, 0, 100);
+     //  w.draw();
+     ////}
+     
+     
      /*SHOWS A SINGLE POLYGON*/
      //ArrayList<Wall> test = new ArrayList<Wall>();
      //PVector[] nodesTest = {reflex.get(0).pt, reflex.get(0).connections.get(0).wall.end,
@@ -305,9 +358,9 @@ class NavMesh
      //reflex.get(0).connections.get(0).wall.draw();
      
      /*SHOWS A SINGLE POINT*/
-     //stroke(0, 0, 150);
-     //fill(0, 0, 150);
-     //circle(allPoints.get(4).pt.x, allPoints.get(4).pt.y, 10);
+     //stroke(255, 255, 0);
+     //fill(255, 255, 0);
+     //circle(reflex.get(0).pt.x, reflex.get(0).pt.y, 10);
      
      /*SHOWS A SINGLE EDGE*/
      //stroke(0, 0, 150);
