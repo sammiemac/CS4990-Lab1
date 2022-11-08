@@ -121,76 +121,71 @@ class NavMesh
        points.sort(new PointCompare());
        println("\nAfter sort");
        for (Point p : points) print(p.id + " ");
-       println();
+       println("\n");
        
        
        // edge generation
        // if all conditions are met, add edge from reflex point to outline vertices
        Point tempstart;
        Point tempend;
-       Edge temp;
+       Wall temp;
        for (int i = 0; i < reflex.size(); i++) // i = index of reflex
        {
          println("\nStarted loop");
-         println("At reflex: " + reflex.get(i).id);
          for (int j = reflex.get(i).id + 1; j != reflex.get(i).id;) // j = index of points
          {
-           println("At reflex: " + reflex.get(i).id + ", Looking at: " + points.get(j).id);
+           println("\nAt reflex: " + reflex.get(i).id + ", Looking at: " + points.get(j).id);
+           tempstart = new Point(reflex.get(i).id, reflex.get(i).pt); // the current reflex
+           tempend = new Point(points.get(j).id, points.get(j).pt); // the point we're trying to connect to
            
            // checks if we are at the neighbor of the current reflex 
            // if we are, don't make an edge but add a connection to the reflex
-           if (j == (reflex.get(i).id + 1) % points.size() || j == (reflex.get(i).id - 1) % perimeter.size())
+           if (j == (reflex.get(i).id + 1) % perimeter.size() || j == (reflex.get(i).id - 1) % perimeter.size())
            {
              println("We are at the neighbor of reflex");
              // start = current reflex, end = reflex neighbor
-             reflex.get(i).connections.add(new Edge(j, new Point(reflex.get(i).id, reflex.get(i).pt), new Point(points.get(j).id, points.get(j).pt)));
+             reflex.get(i).connections.add(new Edge(j, tempstart, tempend));
              println("Connection made");
              j = (j+1)%perimeter.size();
              continue;
            }
-           //else if (j == (reflex.get(i).id - 1) % perimeter.size())
-           //{
-           //  println("We are at the previous neighbor of reflex");
-           //  // start = previous neighbor, end = current reflex
-           //  reflex.get(i).connections.add(new Edge(j, new Point(points.get(j).id, points.get(j).pt), new Point(reflex.get(i).id, reflex.get(i).pt)));
-           //  println("Connection made");
-           //  j = (j+1)%perimeter.size();
-           //  continue;
-           //}
            else // if we are not at a neighbor, then we can try to make a wall
            {
-             boolean intersectsNavMesh = false;
              println("We are trying to make a wall");
-             tempstart = new Point(reflex.get(i).id, reflex.get(i).pt); // the current reflex
-             tempend = new Point(points.get(j).id, points.get(j).pt); // the point we're trying to connect to
-             temp = new Edge(j, tempstart, tempend);
+             
+             boolean intersectsNavMesh = false;
              
              // give the start and end points some clearance
-             temp.w.start = PVector.add(temp.w.start, PVector.mult(temp.w.direction, 0.01));
-             temp.w.end = PVector.add(temp.w.end, PVector.mult(temp.w.direction, -0.01));
+             temp = new Wall(tempstart.pt, tempend.pt);
+             temp.start = PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
+             temp.end = PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
              // checks if temp will collide with wall and is within map
-             if (!map.collides(temp.w.start, temp.w.end) && isPointInPolygon(temp.w.center(), perimeter))
+             if (!map.collides(temp.start, temp.end) && isPointInPolygon(temp.center(), perimeter))
              {
                // checks if edge will collide with other edges, removes unnecessary edges
                
                for (int k = 0; k < edges.size(); k++) // k = index of edges
                {
-                 if (temp.w.crosses(edges.get(k).start.pt, edges.get(k).end.pt))
+                 if (temp.crosses(edges.get(k).start.pt, edges.get(k).end.pt))
                  {
                    intersectsNavMesh = true;
-                   if (temp.start.id == edges.get(k).end.id && temp.end.id == edges.get(k).start.id)
+                   if (tempstart.id == edges.get(k).end.id && tempend.id == edges.get(k).start.id)
                    {
-                     reflex.get(i).connections.add(temp);
+                     reflex.get(i).connections.add(new Edge(j, tempstart, tempend));
                      println("Same edge, connection made");
+                     break;
                    }
-                   println("Crosses another edge, no edge made");
-                   break;
+                   else
+                   {
+                     println("Crosses another edge, no edge made");
+                     break;
+                   }
                  }
                }
                if (!intersectsNavMesh)
                {
-                 edges.add(temp);
-                 reflex.get(i).connections.add(temp);
+                 edges.add(new Edge(j, tempstart, tempend));
+                 reflex.get(i).connections.add(new Edge(j, tempstart, tempend));
                  println("Meets conditions, edge and connection made");
                }   
              }
