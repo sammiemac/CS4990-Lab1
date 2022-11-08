@@ -33,21 +33,21 @@ class Node
    }
 }
 
-class Point
+class PointInfo
 {
   
   int id; // holds the id of the point
   PVector pt; // holds the location of the point
   ArrayList<Edge> connections = new ArrayList<Edge>(); // holds the connections from this point
   
-  Point(int id, PVector pt)
+  PointInfo(int id, PVector pt)
   {
     this.id = id;
     this.pt = pt;
   }
 }
 
-class Edge
+class EdgeInfo
 {
 
   int id; // holds the id of the edge
@@ -55,7 +55,7 @@ class Edge
   int end; // holds the ending point that makes this edge
   Wall w; // holds the wall that creates this edge
   
-  Edge(int id, Point start, Point end)
+  EdgeInfo(int id, PointInfo start, PointInfo end)
   {
     this.id = id;
     this.start = start.id;
@@ -64,10 +64,10 @@ class Edge
   } 
 }
 
-class PointCompare implements Comparator<Point>
+class PointCompare implements Comparator<PointInfo>
 {
 
-  int compare(Point a, Point b)
+  int compare(PointInfo a, PointInfo b)
   {
      if (a.id < b.id) return -1;
      if (a.id > b.id) return 1;
@@ -75,42 +75,30 @@ class PointCompare implements Comparator<Point>
   }  
 }
 
-class Reflex
-{
-  int id; // id of reflex point
-  PVector pt; // location of reflex
-  ArrayList<Wall> connections = new ArrayList<Wall>();
-  
-  Reflex(int id, PVector pt)
-  {
-    this.id = id;
-    this.pt = pt;
-    //this.connections = connections;
-  }
-}
-
 class NavMesh
-{   
-  
-  ArrayList<Reflex> reflex = new ArrayList<Reflex>(); // holds reflex vertices
-  //ArrayList<Integer> indices = new ArrayList<Integer>(); // holds indices of map's vertices that are reflex
-  ArrayList<Wall> edges = new ArrayList<Wall>(); // holds new edges of nav mesh
+{
   ArrayList<Wall> perimeter = map.outline; // holds map outline
-  ArrayList<Wall> allEdges = new ArrayList<Wall>(); // holds all the edges of the map (perimeter + edges)
-  ArrayList<PVector> allPoints = new ArrayList<PVector>(); // holds all the points of the map
-  ArrayList<Node> polygonCenter = new ArrayList<Node>(); // holds polygons and nodes
+  ArrayList<PointInfo> allPoints = new ArrayList<PointInfo>(); // holds all the points of the map
+  ArrayList<PointInfo> reflex = new ArrayList<PointInfo>(); // holds reflex vertices
+  ArrayList<EdgeInfo> edges = new ArrayList<EdgeInfo>(); // holds new edges of nav mesh
+  ArrayList<Node> polygonNode = new ArrayList<Node>(); // holds a node's information
   
    void bake(Map map)
    {
        // generate the graph you need for pathfinding
        
        // resets nav mesh whenever new map is generated
-       reflex.clear();
-       //indices.clear();
-       edges.clear();
-       allEdges.clear();
        allPoints.clear();
-       polygonCenter.clear();
+       reflex.clear();
+       edges.clear();
+       polygonNode.clear();
+       
+       // Orders points in perimeter into allPoints
+       for (int i = 0; i < perimeter.size(); i++)
+       {
+         allPoints.add(new PointInfo((i+1)%perimeter.size(), perimeter.get(i).end)); // add the current point to the array list
+         println("Point added: " + allPoints.get(i).id);
+       }
        
        // checks if the angle at the node is reflex, if it is, add to the reflex ArrayList
        for (int i = 0; i < perimeter.size(); i++)
@@ -118,11 +106,6 @@ class NavMesh
          if (perimeter.get(i).normal.dot(perimeter.get((i+1)%perimeter.size()).direction) > 0)
          {
            PVector point = perimeter.get(i).end;
-           //ArrayList<Wall> walls = new ArrayList<Wall>();
-           //Wall temp = new Wall(point, perimeter.get(i).start);
-           //walls.add(temp);
-           //temp = new Wall(point, perimeter.get(i+1).end);
-           //walls.add(temp); 
            reflex.add(new Reflex(i+1, point));
          }
        }
