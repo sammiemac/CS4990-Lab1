@@ -42,7 +42,6 @@ class Boid
    {
      if (target != null)
      {  
-        // TODO: Implement seek here
 
         // Visual debug, draws a line between the boid and the target destination
         line(target.x, target.y, kinematic.position.x, kinematic.position.y);
@@ -106,7 +105,6 @@ class Boid
             kinematic.rotational_velocity = 0;
           }
         }
-        //kinematic.increaseSpeed(3*dt,100000*dt);
      }
      
      // place crumbs, do not change     
