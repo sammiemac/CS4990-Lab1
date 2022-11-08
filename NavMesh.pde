@@ -75,6 +75,15 @@ class PointCompare implements Comparator<PointInfo>
   }  
 }
 
+class Polygon
+{
+  int id;
+  ArrayList<Wall> sides = new ArrayList<Wall>();
+  
+  Polygon(int id)
+  
+}
+
 class NavMesh
 {
   ArrayList<Wall> perimeter = map.outline; // holds map outline
@@ -127,7 +136,7 @@ class NavMesh
            else if (j == (reflex.get(i).id - 1) % perimeter.size())
            {
              println("We are at the previous neighbor of reflex");
-             temp = new EdgeInfo(edgeCounter++, allPoints.get(j), reflex.get(i));
+             temp = new EdgeInfo(edgeCounter++, reflex.get(i), allPoints.get(j));
              reflex.get(i).connections.add(temp);
              j = (j+1)%perimeter.size();
              continue;
@@ -165,57 +174,25 @@ class NavMesh
          }
        }
        
-       //for (int i = 0; i < reflex.size(); i++)
-       //{
-       //  for (int j = 0; j < perimeter.size(); j++)
-       //  {
-       //    // disregards neighbors of reflex
-       //    if (j == reflex.get(i).id + 1 || j == reflex.get(i).id - 1)
-       //      continue;
-       //    else
-       //    {
-       //      Wall temp = new Wall(reflex.get(i).pt, perimeter.get(j).start);
-       //      temp.start = PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
-       //      temp.end = PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
-       //      // checks if temp will collide with wall and is within map
-       //      if (!map.collides(temp.start, temp.end) && isPointInPolygon(temp.center(), perimeter))
-       //      {
-       //        // checks if edge will collide with other edges, removes unnecessary edges
-       //        boolean intersectsNavMesh = false;
-       //        for (int k = 0; k < edges.size(); k++)
-       //        {
-       //          if (temp.crosses(edges.get(k).start, edges.get(k).end))
-       //          {
-       //            intersectsNavMesh = true;
-       //            break;
-       //          }
-       //        }
-       //        if (!intersectsNavMesh)
-       //        {
-       //          edges.add(i, temp);
-       //          reflex.get(i).connections.add(temp);
-       //        }
-       //      }
-       //    }
-       //  }
-       //}
-       
-       
        /*MAKING POLYGON CODE*/
-       //ArrayList<Wall> polygon = new ArrayList<Wall>();
-       
-       //for (int i = 0; i < reflex.size(); i++)
-       //{         
-       //  // from each reflex point, make a polygon using the reflex point and the endpoints of the neighboring connections
-       //  println("Size of connections array: " + reflex.get(i).connections.size());
-       //  for (int j = 0; j < reflex.get(i).connections.size() - 1; j++)
-       //  {
-       //     PVector[] nodes = {reflex.get(i).pt, reflex.get(i).connections.get(j).end, reflex.get(i).connections.get(j+1).end};
-       //     AddPolygon(polygon, nodes);
-       //     Node node = new Node(0, polygon);
-       //     polygonCenter.add(j, node);
-       //  }
-       //}
+       int polygonCounter = 0;
+       ArrayList<Wall> polygon = new ArrayList<Wall>();
+       Node node;
+       for (int i = 0; i < reflex.size(); i++)
+       {        
+         // from each reflex point, make a polygon using the reflex point and the endpoints of the neighboring connections
+         println("Size of connections array: " + reflex.get(i).connections.size());
+         for (int j = 0; j < reflex.get(i).connections.size() - 1; j++)
+         {
+            PVector[] nodes = {reflex.get(i).pt, reflex.get(i).connections.get(j).wall.end,
+                               reflex.get(i).connections.get((j+1)%reflex.get(i).connections.size()).wall.end};
+            AddPolygon(polygon, nodes);
+            node = new Node(polygonCounter++, polygon);
+            polygonNode.add(node);
+            polygon.clear();
+            nodes = null;
+         }
+       }
        
        //// adds the walls of the perimeter and the navmesh to allWalls
        //allEdges.addAll(perimeter);
@@ -280,24 +257,34 @@ class NavMesh
      // DEBUGGING CODE
      
      /*SHOWS EVERY POLYGON FROM A REFLEX VERTEX*/
-     //for (Wall w : polygonCenter.get(0).polygon)
-     //{
-     //  stroke(255, 255, 50);
-     //  w.draw();
-     //}
-     //stroke(0, 150 , 150);
-     //fill(0, 255, 100);
+     for (Wall w : polygonNode.get(0).polygon)
+     {
+       stroke(255, 255, 50);
+       w.draw();
+     }
+     println("Size of polygonNode array: " + polygonNode.size());
      
      /*SHOWS ALL CONNECTIONS FROM A REFLEX VERTEX*/
-     for (EdgeInfo w : reflex.get(2).connections)
-     {
-       stroke(150, 0, 100);
-       w.wall.draw();
-     }
+     //for (EdgeInfo w : reflex.get(0).connections)
+     //{
+     //  stroke(150, 0, 100);
+     //  w.wall.draw();
+     //}
      
+     /*SHOWS A SINGLE POLYGON*/
+     //ArrayList<Wall> test = new ArrayList<Wall>();
+     //PVector[] nodesTest = {reflex.get(0).pt, reflex.get(0).connections.get(0).wall.end,
+     //                   reflex.get(0).connections.get(1).wall.end};
+     //AddPolygon(test, nodesTest);
+     //for (Wall w : test)
+     //{
+     //  stroke(50, 100, 100);
+     //  w.draw();
+     //}
+       
      /*SHOWS A SINGLE CONNECTION*/
      //stroke(0, 100, 100);
-     //reflex.get(0).connections.get(0).draw();
+     //reflex.get(0).connections.get(0).wall.draw();
      
      /*SHOWS A SINGLE POINT*/
      //stroke(0, 0, 150);
