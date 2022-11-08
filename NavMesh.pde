@@ -156,9 +156,9 @@ class NavMesh
              boolean intersectsNavMesh = false;
              
              // give the start and end points some clearance
-             temp = new Wall(tempstart.pt, tempend.pt);
-             temp.start = PVector.add(temp.start, PVector.mult(temp.direction, 0.01));
-             temp.end = PVector.add(temp.end, PVector.mult(temp.direction, -0.01));
+             temp = new Wall(reflex.get(i).pt, perimeter.get(j).start);
+             temp.start = PVector.add(temp.start, PVector.mult(temp.direction, 0.001));
+             temp.end = PVector.add(temp.end, PVector.mult(temp.direction, -0.001));
              // checks if temp will collide with wall and is within map
              if (!map.collides(temp.start, temp.end) && isPointInPolygon(temp.center(), perimeter))
              {
@@ -282,7 +282,7 @@ class NavMesh
      
      /*SHOWS A SINGLE CONNECTION*/
      //stroke(0, 100, 100);
-     //reflex.get(0).connections.get(5).w.draw();
+     //reflex.get(1).connections.get(0).w.draw();
      
      /*SHOWS ALL THE VERTEX POINTS ON THE MAP*/
      for (Point pt : points)
@@ -299,6 +299,18 @@ class NavMesh
        fill(255, 255, 0);
        circle(r.pt.x, r.pt.y, 12);
      }
+     
+     //stroke(0, 0, 255);
+     //fill(0, 0, 255);
+     ////Point yuh1 = new Point(reflex.get(1).id, reflex.get(1).pt);
+     ////Point yuh2 = new Point(points.get(6).id, points.get(6).pt);
+     //Wall blah = new Wall(reflex.get(1).pt, perimeter.get(6).start);
+     //blah.start = PVector.add(blah.start, PVector.mult(blah.direction, 2));
+     //blah.end = PVector.add(blah.end, PVector.mult(blah.direction, -2));
+     
+     //blah.draw();
+     //if (map.collides(blah.start, blah.end))
+     //  println("Ain't happening g");
      
      //stroke(150, 150, 100);
      //reflex.get(0).connections.get(0).draw();
