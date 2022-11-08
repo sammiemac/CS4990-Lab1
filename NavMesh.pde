@@ -258,7 +258,27 @@ class NavMesh
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
    {
-      /// implement A* to find a path
+      // implement A* to find a path
+      
+/*    From an array of nodes (that contain nodes that represent the middle of a polygon and the midpoints of each edge)
+         - find the distance between each node to each neighbor (this will be each node's cost)
+         - find the straight line distance from each node to the target, then add this distance to an array (this will be each node's heuristic)
+         - find the node that is closest in distance to the boid agent
+         - find the node that is closest in distance to the target location
+          
+      A* Algo:
+        - from the node that is closest to the boid, look at that node's neighbors and find the total sum of it's cost and it's heuristic
+        - add this sum to a sorted array, with the smallest total sum at index position 0 (the first object in the array)
+        - add the node with the lowest total to another array that hold's the boid's waypoints
+        - from this node, look at this node's neighbors and find the total sum of it's cost (this cost to get to this node + the cost to get to its neighbor) and it's heursitic
+        - add this sum to a sorted array, with the smallest total sum at index position 0 (the first object in the array)
+        - add the node with the lowest total to another array that hold's the boid's waypoints
+        - repeat until at destination
+        - **if two or more nodes have the same total sum of cost and heuristics, add them to separate arrays and navigate on both of them
+        - once the last node has been found, add the target location as the final point in the waypoints in the array
+        - navigate
+*/
+      
       ArrayList<PVector> result = null;
       return result;
    }
