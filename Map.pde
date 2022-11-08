@@ -68,13 +68,14 @@ class Wall
    }
 }
 
-void AddPolygon(ArrayList<Wall> walls, PVector[] nodes)
+ArrayList<PolygonEdgeInfo> AddPolygon(ArrayList<EdgeInfo> walls, PointInfo[] nodes)
 {
     for (int i = 0; i < nodes.length; ++ i)
     {
        int next = (i+1)%nodes.length;
        walls.add(new Wall(nodes[i], nodes[next]));
     }
+    return walls;
 }
 
 void AddPolygonScaled(ArrayList<Wall> walls, PVector[] nodes)

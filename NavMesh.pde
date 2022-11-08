@@ -7,7 +7,7 @@ import java.util.Comparator;
 class Node
 {
    int id;
-   ArrayList<Wall> polygon;
+   ArrayList<PolygonEdgeInfo> polygon;
    PVector center;
    ArrayList<Node> neighbors;
    ArrayList<Wall> connections;
@@ -16,7 +16,6 @@ class Node
    {
      this.id = id;
      this.polygon = polygon;
-     //this.neighbors = neighbors;
      float xSum = 0;
      float ySum = 0;
      for (Wall w : polygon)
@@ -25,11 +24,18 @@ class Node
        ySum += w.start.y;
      }
      this.center = new PVector(xSum / polygon.size(), ySum / polygon.size());
-     //for (int i = 0; i < neighbors.size(); i++)
-     //{
-     //  Wall connect = new Wall(center, neighbors.get(i).center);
-     //  connections.add(i, connect);
-     //}
+   }
+   
+   Node(ArrayList<Node> otherNodes)
+   {
+     this.neighbors = new ArrayList<Node>();
+     // for (int i = 0; i < otherNodes.size(); i++)
+     //     algo: if this node shares an edge with otherNodes.get(i), add that node to this.neighbors
+     for (int i = 0; i < neighbors.size(); i++)
+     {
+       Wall connect = new Wall(center, neighbors.get(i).center);
+       connections.add(i, connect);
+     }
    }
 }
 
@@ -64,6 +70,22 @@ class EdgeInfo
   } 
 }
 
+class PolygonEdgeInfo
+{
+  int id; // holds the id of the edge
+  int start; // holds the starting point that makes this edge
+  int end; // holds the ending point that makes this edge
+  Wall wall; // holds the wall that creates this edge
+  
+  PolygonEdgeInfo(int id, PointInfo start, PointInfo end)
+  {
+    this.id = id;
+    this.start = start.id;
+    this.end = end.id;
+    this.wall = new Wall(start.pt, end.pt);
+  }
+}
+
 class PointCompare implements Comparator<PointInfo>
 {
 
@@ -73,15 +95,6 @@ class PointCompare implements Comparator<PointInfo>
      if (a.id > b.id) return 1;
      return 0;
   }  
-}
-
-class Polygon
-{
-  int id;
-  ArrayList<Wall> sides = new ArrayList<Wall>();
-  
-  Polygon(int id)
-  
 }
 
 class NavMesh
@@ -176,7 +189,7 @@ class NavMesh
        
        /*MAKING POLYGON CODE*/
        int polygonCounter = 0;
-       ArrayList<Wall> polygon = new ArrayList<Wall>();
+       ArrayList<PolygonEdgeInfo> polygon = new ArrayList<PolygonEdgeInfo>();
        Node node;
        for (int i = 0; i < reflex.size(); i++)
        {        
@@ -184,13 +197,11 @@ class NavMesh
          println("Size of connections array: " + reflex.get(i).connections.size());
          for (int j = 0; j < reflex.get(i).connections.size() - 1; j++)
          {
-            PVector[] nodes = {reflex.get(i).pt, reflex.get(i).connections.get(j).wall.end,
+            PointInfo[] nodes = {reflex.get(i), reflex.get(i).connections.get(j),
                                reflex.get(i).connections.get((j+1)%reflex.get(i).connections.size()).wall.end};
-            AddPolygon(polygon, nodes);
-            node = new Node(polygonCounter++, polygon);
+            node = new Node(polygonCounter++, AddPolygon(polygon, nodes));
             polygonNode.add(node);
             polygon.clear();
-            nodes = null;
          }
        }
        
@@ -222,12 +233,14 @@ class NavMesh
    void draw()
    {
      
+     /*Draws the newly made edges for the NavMesh*/
      for (EdgeInfo w : edges)
      {
        stroke(150, 0, 255);
        w.wall.draw();
      }
      
+     /*Draws all the points on the map*/
      for (PointInfo p : allPoints)
      {
        stroke(255, 0 , 150);
@@ -235,6 +248,7 @@ class NavMesh
        circle(p.pt.x, p.pt.y, 10);
      }
      
+     /*Draws all the reflex points on the map*/
      for (int i = 0; i < reflex.size(); i++)
      {
        stroke(0, 255 , 150);
@@ -242,27 +256,31 @@ class NavMesh
        circle(reflex.get(i).pt.x, reflex.get(i).pt.y, 10);
      }
      
-     ////for (Node n : polygonCenter.get()
-     ////{
-     //  for (Wall w : polygonCenter.get(0).polygon)
-     //  {
-     //    stroke(150, 150, 100);
-     //    w.draw();
-     //  }
-     //  stroke(0, 150 , 150);
-     //  fill(0, 255, 100);
-     //  //circle(n.center.x, n.center.y, 10);
-     ////}
+     for (Node n : polygonNode)
+     {
+       for (Wall w : n.polygon)
+       {
+         stroke(255, 255, 100);
+         w.draw();
+       }
+       stroke(0, 150 , 150);
+       fill(0, 255, 100);
+       circle(n.center.x, n.center.y, 10);
+     }
      
      // DEBUGGING CODE
      
      /*SHOWS EVERY POLYGON FROM A REFLEX VERTEX*/
-     for (Wall w : polygonNode.get(0).polygon)
-     {
-       stroke(255, 255, 50);
-       w.draw();
-     }
-     println("Size of polygonNode array: " + polygonNode.size());
+     //for (Node p : polygonNode)
+     //{
+     //  for (Wall w : p.polygon)
+     //  {
+     //    stroke(255, 255, 50);
+     //    w.draw();
+     //    println("Printing polygon");
+     //  }
+     //}
+     //println("Size of polygonNode array: " + polygonNode.size());
      
      /*SHOWS ALL CONNECTIONS FROM A REFLEX VERTEX*/
      //for (EdgeInfo w : reflex.get(0).connections)
