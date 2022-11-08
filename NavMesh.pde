@@ -53,7 +53,7 @@ class Node
        if (point3 == nextPoint1 || point3 == nextPoint2 || point3 == nextPoint3)
          edgeNeighborCounter += 1;
        if (edgeNeighborCounter == 2)
-         this.neighbors.add(0, (otherNodes.get((i)%otherNodes.size())));
+         this.neighbors.add((otherNodes.get((i)%otherNodes.size())));
      }
      for (int i = 0; i < this.neighbors.size(); i++)
      {
@@ -84,6 +84,7 @@ class EdgeInfo
   int start; // holds the starting point that makes this edge
   int end; // holds the ending point that makes this edge
   Wall wall; // holds the wall that creates this edge
+  PVector midpoint; // holds the midpoint of this edge
   
   EdgeInfo(int id, PointInfo start, PointInfo end)
   {
@@ -91,6 +92,8 @@ class EdgeInfo
     this.start = start.id;
     this.end = end.id;
     this.wall = new Wall(start.pt, end.pt);
+        
+    this.midpoint = new PVector( (wall.start.x + wall.end.x)/2, (wall.start.y + wall.end.y)/2 );
   } 
 }
 
@@ -330,6 +333,13 @@ class NavMesh
          stroke(0, 255, 100);
          w.draw();
        }
+     }
+     
+     for (EdgeInfo e : edges)
+     {
+       stroke(0, 255 , 100);
+       fill(0, 150, 150);
+       circle(e.midpoint.x, e.midpoint.y, 10);
      }
      
      
