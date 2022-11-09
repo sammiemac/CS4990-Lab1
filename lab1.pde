@@ -47,13 +47,13 @@ void mousePressed() {
      else
      {
         if (billy.kinematic.speed == 0 && entering_path == false)
-          waypoints.clear();
+          waypoints = null;
         // Distance between target and boid when target is initiated
         float dist = PVector.dist(target, billy.kinematic.position);
         entering_path = false;
         // clears array when new target is made during follow()
         if (billy.kinematic.getSpeed() > 0) {
-          waypoints.clear();
+          waypoints = null;
           billy.seek(target, dist);
         }
         else {
