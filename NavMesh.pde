@@ -3,12 +3,13 @@ import java.util.*;
 
 class Node
 {
-   int id;
-   ArrayList<Wall> polygon;
-   ArrayList<Integer> cornerIDs;
-   PVector center;
-   ArrayList<Node> neighbors;
-   ArrayList<Wall> connections;
+   int id; // holds ID of polygon node
+   ArrayList<Wall> polygon; // holds walls of the polygon
+   ArrayList<Integer> cornerIDs; // holds ID of each of the corners
+   PVector center; // holds coordinates of polygon's center
+   ArrayList<Node> neighbors; // holds Nodes of polygons that are adjacent to current polygon
+   ArrayList<Wall> connections; // holds graph of walls connecting polygon center to midpoints of adjacent edges
+                                // 
    
    Node(int id, ArrayList<Wall> polygon, ArrayList<Integer> cornerIDs)
    {
