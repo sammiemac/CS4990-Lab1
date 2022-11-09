@@ -60,6 +60,7 @@ class Boid
         angleTo = normalize_angle_left_right(angleTo - kinematic.getHeading());
         //println("Angle to Target: " + angleTo);
         //println("Kinematic Heading: " + kinematic.getHeading());
+        float angleNext;
         
         // Distance to target
         float updateDist = PVector.dist(target, kinematic.position);
@@ -67,46 +68,69 @@ class Boid
         
         // The following section covers takeoff from current location to target
         
-        // Accelerate boid slower if too close to new target
-        if (updateDist < 30 || kinematic.getSpeed() == 0) {
-          if (angleTo < 0) {
-            kinematic.increaseSpeed(20*dt, 100000*dt);
-          } else if (angleTo > 0) {
-            kinematic.increaseSpeed(20*dt, -100000*dt);
-          }
-        }
-        else {
-          if (angleTo < 0) {
-            kinematic.increaseSpeed(50*dt, 100000*dt);
-          } else if (angleTo > 0) {
-            kinematic.increaseSpeed(50*dt, -100000*dt);
-          }
-        }
-        
-        // The following section covers arrival and deacceleration
-        
-        /*WIP OF DYNAMIC STOPPING*/
-        //if (waypoints != null || waypointsIndex != waypoints.size()) {
-        //  int tempIndex = (waypointsIndex + 1)%waypoints.size();
-        //  float angleNext = atan2(target.x - waypoints.get(tempIndex).x, target.y - waypoints.get(tempIndex).y);
-        //  angleNext = normalize_angle(angleNext - kinematic.getHeading());
-        //}
-        
-        // Slow down boid proportionally nearing arrival of current target; stop near final target  
-        if ((updateDist < dist*0.1 || updateDist < 40) && kinematic.speed > 0) {
-          kinematic.increaseSpeed(-2*kinematic.getSpeed()*dt, 0);
-        }
-        if (updateDist < 1) {
-          if (waypoints != null && (waypointsIndex < waypoints.size()-1)) {
-             target = waypoints.get(++waypointsIndex);
-             dist = PVector.dist(target, kinematic.position);
-          }
-          else {
+        // begin movement if not on path or on last lastpoint
+        if (waypoints == null || waypointsIndex == waypoints.size() - 2)
+        {
+          // resets waypoints when left-clicking or when on last waypoint in ArrayList
+          waypoints = null;
+          waypointsIndex = 0;
+          
+          // ensures boid is always turning toward target
+          if (angleTo < 0)
+            kinematic.increaseSpeed(0, 1000*dt);
+          else if (angleTo > 0)
+            kinematic.increaseSpeed(0, -1000*dt);
+          else
+            kinematic.increaseSpeed(0, 0);
+            
+          // speed up depending on distance  
+          if (updateDist < 30 || kinematic.getSpeed() == 0)
+            kinematic.increaseSpeed(5*dt, 0);
+          else
+            kinematic.increaseSpeed(20*dt, 0);
+          
+          if ((updateDist < dist*0.1 || updateDist < 40) && kinematic.speed > 10)
+            kinematic.increaseSpeed(-1.5*kinematic.getSpeed()*dt, 0);
+          
+          // stop when boid reaches target  
+          if (updateDist < 0.5)
+          {
+            println("Ya done now");
             kinematic.speed = 0;
             kinematic.rotational_velocity = 0;
+            target = null;
+            entering_path = false;
           }
         }
-        //kinematic.increaseSpeed(3*dt,100000*dt);
+        // movement when on path
+        else
+        {
+          angleNext = atan2(target.y - waypoints.get((waypointsIndex+1)%waypoints.size()).y,
+                              target.x - waypoints.get((waypointsIndex+1)%waypoints.size()).x);
+          angleNext = normalize_angle_left_right(angleNext - kinematic.getHeading());
+          println("Angle next = " + angleNext);
+          if (angleTo < 0)
+            kinematic.increaseSpeed(0, 1000*dt);
+          else if (angleTo > 0)
+            kinematic.increaseSpeed(0, -1000*dt);
+          else
+            kinematic.increaseSpeed(0, 0);
+            
+          if (updateDist < 30 || kinematic.getSpeed() == 0)
+            kinematic.increaseSpeed(5*dt, 0);
+          else
+             kinematic.increaseSpeed(20*dt, 0);
+             
+          if ((updateDist < dist*0.15 || updateDist < 40) && (abs(angleNext) < 0.5 && abs(angleNext) > (TAU-0.5)))
+          {
+            kinematic.increaseSpeed(-1.5*kinematic.getSpeed()*dt, 0);
+          }
+             
+          if (updateDist < 4)
+            target = waypoints.get(++waypointsIndex);
+          if (waypointsIndex == waypoints.size() - 1)
+            waypoints = null;
+        }
      }
      
      // place crumbs, do not change     
