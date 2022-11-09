@@ -10,6 +10,7 @@ class Node
   ArrayList<Node> neighbors; // holds Nodes of polygons that are adjacent to current polygon
   ArrayList<Wall> connections; // holds graph of walls connecting polygon center to midpoints of adjacent edges
                                 // and then to centers of adjacent polygons
+  ArrayList<PVector> betweenMidpoints;
    
    Node(int id, ArrayList<Wall> polygon, ArrayList<Integer> cornerIDs)
    {
@@ -31,6 +32,7 @@ class Node
      this.center = new PVector(xSum / polygon.size(), ySum / polygon.size());
      this.neighbors = new ArrayList<Node>();
      this.connections = new ArrayList<Wall>();
+     this.betweenMidpoints = new ArrayList<PVector>();
    }
    
    void getNodeNeighbors(ArrayList<Node> otherNodes, ArrayList<EdgeInfo> edges)
@@ -98,10 +100,18 @@ class Node
          break;
        Wall connect = new Wall(this.center, midpoints.get(i));
        connections.add(connect);
+       PVector mid = midpoints.get(i);
+       betweenMidpoints.add(mid);
        connect = new Wall(midpoints.get(i), neighbors.get(i).center);
        connections.add(connect);
      }
    }
+   
+   ArrayList<PVector> getNavigableGraph()
+   {
+     return new ArrayList<PVector>();
+   }
+   
 }
 
 // added PointInfo and EdgeInfo classes to give points and edges IDs
@@ -111,6 +121,8 @@ class PointInfo
   int id; // holds ID of the point
   PVector pt; // holds location of the point
   ArrayList<EdgeInfo> connections = new ArrayList<EdgeInfo>(); // holds the connections from this point
+  int cost; // holds the distance between the current point to this point
+  int heuristic; // holds the distance between this point and the target location
   
   PointInfo(int id, PVector pt)
   {
@@ -311,7 +323,48 @@ class NavMesh
    {
       // implement A* to find a path
       
-/*    From an array of nodes (that contain nodes that represent the middle of a polygon and the midpoints of each edge)
+      /*The following is an incomplete implementation of A* search (pseudocode). 
+      While the code doesn't actually work, it captures the idea we had 
+      for implementing this portion of the lab.*/
+      
+/*    Node currentNode = new Node(); // holds the node that the boid is currently at
+      Node lookingAt; // holds the node that we are thinking of moving to next
+      float totalCost = 0; // holds the total cost
+      ArrayList<Node> distances = new ArrayList<Node>(); // holds all of the midpoints sorted by their distance from the starting location
+      ArrayList<Node> priorityQueue = new ArrayList<Node>(); // holds the priority queue for a*
+      ArrayList<PVectors> result = new ArrayList<PVectors>(); // holds all the nodes we've visited in order
+      
+      // from an arraylist of midpoints, find the distance from the starting location to the midpoint
+      for(int i = 0; i < midpoints.size(); i++)
+      {
+        Node temp = midpoints.get(i);
+        temp.dist = (start - midpoints.get(i).pt).mag;
+        distances.add(temp);
+      }
+      distances.sort(dist); // sort the distances from shortest to longest
+      currentNode = distances.get(0); // when first initiated, set the current node to the closest midpoint from the starting location
+      result.add(distances.get(0)); // add the first midpoint visited to results
+      
+      // as long as we aren't at the destination, pathfind using a*
+      while(currentNode.pt != destination)
+      {
+        // look at the neighbors of the current node
+        for (int i = 0; i < currentNode.neighbors.size(); i++)
+        {
+          lookingAt = currentNode.neighbors.get(i); // look at the neighbor
+          lookingAt.cost = (lookingAt.pt - currentNode.pt).mag; // the cost to get to this neighbor (distance between the nodes)
+          totalCost += lookingAt.cost; // add the cost to the total cost
+          lookingAt.heuristic = (destination - lookingAt.pt).mag; // the heuristic is the distance between the node and the destination
+          lookingAt.totalSum = (totalCost + lookingAt.heuristic); // the value of this node, the sum of the total cost traveled and the node's heuristic
+          priorityQueue.add(lookingAt); // add to the priority queue
+        }
+        priorityQueue.sort(totalSum); // sort the priority queue by the totalSum, from smallest to largest
+        
+        result.add(priorityQueue.get(0)); // add the node with the smallest value to the result
+        currentNode = priorityQueue.get(0); // move to the next node
+      }
+      
+/*    From an array of nodes (that contain nodes that represent the midpoints of each edge)
          - find the distance between each node to each neighbor (this will be each node's cost)
          - find the straight line distance from each node to the target, then add this distance to an array (this will be each node's heuristic)
          - find the node that is closest in distance to the boid agent
@@ -329,7 +382,6 @@ class NavMesh
         - once the last node has been found, add the target location as the final point in the waypoints in the array
         - navigate
 */
-      
       ArrayList<PVector> result = null;
       return result;
    }
@@ -392,6 +444,16 @@ class NavMesh
      
      
      // DEBUGGING CODE
+     
+     for (Node p : polygonNode)
+     {
+       for (MidpointInfo m : p.betweenMidpoints)
+       {
+         stroke(255, 0 , 150);
+         fill(255, 0, 100);
+         circle(m.pt.x, m.pt.y, 10);
+       }
+     }
      
      /*SHOWS EVERY POLYGON FROM A REFLEX VERTEX*/
      //for (Node p : polygonNode)
