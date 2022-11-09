@@ -1,9 +1,6 @@
 // Useful to sort lists by a custom key
 import java.util.*;
 
-// In this file you will implement your navmesh and pathfinding. 
-
-// This node representation is just a suggestion
 class Node
 {
    int id;
@@ -37,18 +34,14 @@ class Node
    void getNodeNeighbors(int id, ArrayList<Node> otherNodes, ArrayList<EdgeInfo> edges)
    {
      int edgeNeighborCounter, point1, point2, point3, nextPoint1, nextPoint2, nextPoint3;
-     PVector pt1, pt2, pt3, tempmidpoint;
+     PVector tempmidpoint;
      point1 = cornerIDs.get(0);
      println("Polygon " + id + "'s Corner 0: " + cornerIDs.get(0));
-     //pt1 = polygon.get(0).start;
      point2 = cornerIDs.get(1);
      println("Polygon " + id + "'s Corner 1: " + cornerIDs.get(1));
-     //pt2 = polygon.get(1).start;
      point3 = cornerIDs.get(2);
      println("Polygon " + id + "'s Corner 2: " + cornerIDs.get(2));
-     //pt3 = polygon.get(2).start;
      ArrayList<Integer> tempID = new ArrayList<Integer>();
-     Wall tempwall;
      ArrayList<PVector> midpoints = new ArrayList<PVector>();
      
      for (int i = 0; i < otherNodes.size(); i++)
@@ -93,10 +86,6 @@ class Node
              midpoints.add(tempmidpoint);
            }
          }
-         //tempwall = new Wall(tempID.get(0), tempID.get(1));
-         //println("The edge is from " + tempID.get(0) + " to " + tempID.get(1));
-         //tempmidpoint = new PVector((tempwall.start.x + tempwall.end.x)/2, (tempwall.start.y + tempwall.end.y)/2);
-         //midpoints.add(tempmidpoint);
        }
      }
      for (int i = 0; i < this.neighbors.size(); i++)
@@ -105,8 +94,6 @@ class Node
        connections.add(connect);
        connect = new Wall(midpoints.get(i), neighbors.get(i).center);
        connections.add(connect);
-       //Wall connect = new Wall(this.center, neighbors.get(i).center);
-       //connections.add(connect);
      }
    }
 }
@@ -185,9 +172,7 @@ class NavMesh
   ArrayList<Node> polygonNode = new ArrayList<Node>(); // holds a node's information
   
    void bake(Map map)
-   {
-       // generate the graph you need for pathfinding
-       
+   {   
        // resets nav mesh whenever new map is generated
        allPoints.clear();
        reflex.clear();
