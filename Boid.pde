@@ -121,9 +121,9 @@ class Boid
           else
              kinematic.increaseSpeed(20*dt, 0);
              
-          if ((updateDist < dist*0.15 || updateDist < 40) && (abs(angleNext) < 0.5 && abs(angleNext) > (TAU-0.5)))
+          if ((updateDist < dist*0.15 || updateDist < 40) || (abs(angleNext) < 0.5 && abs(angleNext) > (TAU-0.5)))
           {
-            kinematic.increaseSpeed(-1.5*kinematic.getSpeed()*dt, 0);
+            kinematic.increaseSpeed(-0.5*kinematic.getSpeed()*dt, 0);
           }
              
           if (updateDist < 4)
