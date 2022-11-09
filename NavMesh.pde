@@ -435,14 +435,6 @@ class NavMesh
        }
      }
      
-     //for (EdgeInfo e : edges)
-     //{
-     //  stroke(0, 255 , 100);
-     //  fill(0, 150, 150);
-     //  circle(e.midpoint.x, e.midpoint.y, 10);
-     //}
-     
-     
      // DEBUGGING CODE
      
      /*SHOWS EVERY POLYGON FROM A REFLEX VERTEX*/

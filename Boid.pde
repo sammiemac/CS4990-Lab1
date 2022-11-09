@@ -107,8 +107,8 @@ class Boid
         {
           angleNext = atan2(target.y - waypoints.get((waypointsIndex+1)%waypoints.size()).y,
                               target.x - waypoints.get((waypointsIndex+1)%waypoints.size()).x);
-          float angleDifference = angleNext - kinematic.getHeading();
-          println("Angle differenece = " + angleDifference);
+          angleNext = normalize_angle_left_right(angleNext - kinematic.getHeading());
+          println("Angle next = " + angleNext);
           if (angleTo < 0)
             kinematic.increaseSpeed(0, 1000*dt);
           else if (angleTo > 0)
@@ -121,8 +121,10 @@ class Boid
           else
              kinematic.increaseSpeed(20*dt, 0);
              
-          if ((updateDist < dist*0.15 || updateDist < 40))
-            kinematic.increaseSpeed(-10*abs(angleDifference/TAU)*kinematic.getSpeed()*dt, 0);
+          if ((updateDist < dist*0.15 || updateDist < 40) && (abs(angleNext) < 0.5 && abs(angleNext) > (TAU-0.5)))
+          {
+            kinematic.increaseSpeed(-1.5*kinematic.getSpeed()*dt, 0);
+          }
              
           if (updateDist < 4)
             target = waypoints.get(++waypointsIndex);
