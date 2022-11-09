@@ -105,27 +105,31 @@ class Boid
         // movement when on path
         else
         {
+          // find angle from target to next target in waypoints
           angleNext = atan2(target.y - waypoints.get((waypointsIndex+1)%waypoints.size()).y,
                               target.x - waypoints.get((waypointsIndex+1)%waypoints.size()).x);
           angleNext = normalize_angle_left_right(angleNext - kinematic.getHeading());
-          println("Angle next = " + angleNext);
+          
+          // ensure boid looks at target
           if (angleTo < 0)
             kinematic.increaseSpeed(0, 1000*dt);
           else if (angleTo > 0)
             kinematic.increaseSpeed(0, -1000*dt);
           else
             kinematic.increaseSpeed(0, 0);
-            
+          
+          // speed up depending on distance
           if (updateDist < 30 || kinematic.getSpeed() == 0)
             kinematic.increaseSpeed(5*dt, 0);
           else
              kinematic.increaseSpeed(20*dt, 0);
-             
+          // slow down slightly when approaching target, even more so when angle is harsh   
           if ((updateDist < dist*0.15 || updateDist < 40) || (abs(angleNext) < 0.5 && abs(angleNext) > (TAU-0.5)))
           {
             kinematic.increaseSpeed(-0.5*kinematic.getSpeed()*dt, 0);
           }
-             
+          
+          // switch to next target when boid reaches current target
           if (updateDist < 4)
             target = waypoints.get(++waypointsIndex);
           if (waypointsIndex == waypoints.size() - 1)
