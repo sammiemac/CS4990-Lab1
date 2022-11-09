@@ -445,16 +445,6 @@ class NavMesh
      
      // DEBUGGING CODE
      
-     for (Node p : polygonNode)
-     {
-       for (MidpointInfo m : p.betweenMidpoints)
-       {
-         stroke(255, 0 , 150);
-         fill(255, 0, 100);
-         circle(m.pt.x, m.pt.y, 10);
-       }
-     }
-     
      /*SHOWS EVERY POLYGON FROM A REFLEX VERTEX*/
      //for (Node p : polygonNode)
      //{
