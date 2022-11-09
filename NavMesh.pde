@@ -20,11 +20,7 @@ class Node
      this.cornerIDs = new ArrayList<Integer>();
      for (Integer w : cornerIDs)
        this.cornerIDs.add(w);
-<<<<<<< Updated upstream
      // center == mean of points' coordinates
-=======
-       
->>>>>>> Stashed changes
      float xSum = 0;
      float ySum = 0;
      for (Wall w : polygon)
@@ -33,7 +29,6 @@ class Node
        ySum += w.start.y;
      }
      this.center = new PVector(xSum / polygon.size(), ySum / polygon.size());
-     
      this.neighbors = new ArrayList<Node>();
      this.connections = new ArrayList<Wall>();
    }
@@ -191,18 +186,10 @@ class NavMesh
      edges.clear();
      polygonNode.clear();
        
-<<<<<<< Updated upstream
      // orders point IDs into allPoints and identifies reflex vertices
      for (int i = 0; i < perimeter.size(); i++)
      {
        allPoints.add(new PointInfo(i, perimeter.get(i).start)); // add the current point to the array list, assigns ID in order
-=======
-       // orders point IDs into allPoints and identifies reflex vertices
-       for (int i = 0; i < perimeter.size(); i++)
-       {
-         // add the current point to the array list
-         allPoints.add(new PointInfo(i, perimeter.get(i).start)); 
->>>>>>> Stashed changes
          
        // while traveling the perimeter, if we need to make any turn to the right, it is a reflex
        if (perimeter.get(i).normal.dot(perimeter.get((i+1)%perimeter.size()).direction) > 0)
@@ -364,12 +351,12 @@ class NavMesh
      }
      
      /*Draws all the points on the map*/
-     //for (PointInfo p : allPoints)
-     //{
-     //  stroke(255, 0 , 150);
-     //  fill(255, 0, 100);
-     //  circle(p.pt.x, p.pt.y, 10);
-     //}
+     for (PointInfo p : allPoints)
+     {
+       stroke(255, 0 , 150);
+       fill(255, 0, 100);
+       circle(p.pt.x, p.pt.y, 10);
+     }
      
      /*Draws all the reflex points on the map*/
      for (int i = 0; i < reflex.size(); i++)
@@ -381,19 +368,14 @@ class NavMesh
      
      for (Node n : polygonNode)
      {
-       /*Draws all the polygons made by the NavMesh*/
        //for (Wall w : n.polygon)
        //{
        //  stroke(255, 255, 100);
        //  w.draw();
        //}
-       
-       /*Draws all the centers of each polygon*/
        stroke(0, 150 , 150);
        fill(0, 255, 100);
        circle(n.center.x, n.center.y, 10);
-       
-       /*Draws all connections between the polygon centers and the edge midpoints*/
        for (Wall w : n.connections)
        {
          stroke(0, 255, 100);
@@ -401,12 +383,12 @@ class NavMesh
        }
      }
      
-     for (EdgeInfo e : edges)
-     {
-       stroke(0, 255 , 100);
-       fill(0, 150, 150);
-       circle(e.midpoint.x, e.midpoint.y, 10);
-     }
+     //for (EdgeInfo e : edges)
+     //{
+     //  stroke(0, 255 , 100);
+     //  fill(0, 150, 150);
+     //  circle(e.midpoint.x, e.midpoint.y, 10);
+     //}
      
      
      // DEBUGGING CODE
@@ -451,7 +433,7 @@ class NavMesh
      //AddPolygon(test, nodesTest);
      //for (Wall w : test)
      //{
-     //  stroke(255, 255, 50);
+     //  stroke(50, 100, 100);
      //  w.draw();
      //}
        
