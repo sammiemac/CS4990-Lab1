@@ -16,7 +16,9 @@ class Node
    Node(int id, ArrayList<Wall> polygon, ArrayList<Integer> cornerIDs)
    {
      this.id = id;
-     this.polygon = polygon;
+     this.polygon = new ArrayList<Wall>();
+     for (Wall w : polygon)
+       this.polygon.add(w);
      this.cornerIDs = new ArrayList<Integer>();
      for (Integer w : cornerIDs)
        this.cornerIDs.add(w);
@@ -32,33 +34,79 @@ class Node
      this.connections = new ArrayList<Wall>();
    }
    
-   void getNodeNeighbors(ArrayList<Node> otherNodes)
+   void getNodeNeighbors(int id, ArrayList<Node> otherNodes, ArrayList<EdgeInfo> edges)
    {
      int edgeNeighborCounter, point1, point2, point3, nextPoint1, nextPoint2, nextPoint3;
+     PVector pt1, pt2, pt3, tempmidpoint;
      point1 = cornerIDs.get(0);
+     println("Polygon " + id + "'s Corner 0: " + cornerIDs.get(0));
+     //pt1 = polygon.get(0).start;
      point2 = cornerIDs.get(1);
+     println("Polygon " + id + "'s Corner 1: " + cornerIDs.get(1));
+     //pt2 = polygon.get(1).start;
      point3 = cornerIDs.get(2);
+     println("Polygon " + id + "'s Corner 2: " + cornerIDs.get(2));
+     //pt3 = polygon.get(2).start;
+     ArrayList<Integer> tempID = new ArrayList<Integer>();
+     Wall tempwall;
+     ArrayList<PVector> midpoints = new ArrayList<PVector>();
+     
      for (int i = 0; i < otherNodes.size(); i++)
      {
        edgeNeighborCounter = 0;
+       tempID.clear();
        if (i == this.id)
          continue;
+       println("Comparing Polygon " + id + " with Polygon " + i);
        nextPoint1 = otherNodes.get(i).cornerIDs.get(0);
        nextPoint2 = otherNodes.get(i).cornerIDs.get(1);
        nextPoint3 = otherNodes.get(i).cornerIDs.get(2);
        if (point1 == nextPoint1 || point1 == nextPoint2 || point1 == nextPoint3)
+       {
          edgeNeighborCounter += 1;
+         println("Added Point " + point1 + " to edge");
+         tempID.add(point1);
+       }
        if (point2 == nextPoint1 || point2 == nextPoint2 || point2 == nextPoint3)
+       {
          edgeNeighborCounter += 1;
+         println("Added Point " + point2 + " to edge");
+         tempID.add(point2);
+       }
        if (point3 == nextPoint1 || point3 == nextPoint2 || point3 == nextPoint3)
+       {
          edgeNeighborCounter += 1;
+         println("Added Point " + point3 + " to edge");
+         tempID.add(point3);
+       }
        if (edgeNeighborCounter == 2)
+       {
+         println("Added midpoint!");
          this.neighbors.add((otherNodes.get((i)%otherNodes.size())));
+         for (int j = 0; j < edges.size(); j++)
+         {
+           if ((tempID.get(0) == edges.get(j).start && tempID.get(1) == edges.get(j).end) ||
+               (tempID.get(0) == edges.get(j).end && tempID.get(1) == edges.get(j).start))
+           {
+             tempmidpoint = new PVector((edges.get(j).wall.start.x + edges.get(j).wall.end.x)/2,
+                                       (edges.get(j).wall.start.y + edges.get(j).wall.end.y)/2);
+             midpoints.add(tempmidpoint);
+           }
+         }
+         //tempwall = new Wall(tempID.get(0), tempID.get(1));
+         //println("The edge is from " + tempID.get(0) + " to " + tempID.get(1));
+         //tempmidpoint = new PVector((tempwall.start.x + tempwall.end.x)/2, (tempwall.start.y + tempwall.end.y)/2);
+         //midpoints.add(tempmidpoint);
+       }
      }
      for (int i = 0; i < this.neighbors.size(); i++)
      {
-       Wall connect = new Wall(this.center, neighbors.get(i).center);
+       Wall connect = new Wall(this.center, midpoints.get(i));
        connections.add(connect);
+       connect = new Wall(midpoints.get(i), neighbors.get(i).center);
+       connections.add(connect);
+       //Wall connect = new Wall(this.center, neighbors.get(i).center);
+       //connections.add(connect);
      }
    }
 }
@@ -256,7 +304,7 @@ class NavMesh
        }
        
        for (int i = 0; i < polygonNode.size(); i++)
-         polygonNode.get(i).getNodeNeighbors(polygonNode);
+         polygonNode.get(i).getNodeNeighbors(i, polygonNode, edges);
    }
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
@@ -320,11 +368,11 @@ class NavMesh
      
      for (Node n : polygonNode)
      {
-       for (Wall w : n.polygon)
-       {
-         stroke(255, 255, 100);
-         w.draw();
-       }
+       //for (Wall w : n.polygon)
+       //{
+       //  stroke(255, 255, 100);
+       //  w.draw();
+       //}
        stroke(0, 150 , 150);
        fill(0, 255, 100);
        circle(n.center.x, n.center.y, 10);
@@ -335,12 +383,12 @@ class NavMesh
        }
      }
      
-     for (EdgeInfo e : edges)
-     {
-       stroke(0, 255 , 100);
-       fill(0, 150, 150);
-       circle(e.midpoint.x, e.midpoint.y, 10);
-     }
+     //for (EdgeInfo e : edges)
+     //{
+     //  stroke(0, 255 , 100);
+     //  fill(0, 150, 150);
+     //  circle(e.midpoint.x, e.midpoint.y, 10);
+     //}
      
      
      // DEBUGGING CODE
@@ -365,11 +413,17 @@ class NavMesh
      //}
      
      /*SHOWS ALL CONNECTIONS FROM A POLYGON CENTER*/
-     //for (Wall w : polygonNode.get(0).connections)
+     //for (Wall w : polygonNode.get(3).connections)
      //{
      //  stroke(150, 0, 100);
      //  w.draw();
-     ////}
+     //}
+     //println("Polygon 2's points: " + polygonNode.get(2).cornerIDs.get(0) + " " +
+     //        polygonNode.get(2).cornerIDs.get(1) + " " + polygonNode.get(2).cornerIDs.get(2));
+     //println("Polygon 3's points: " + polygonNode.get(3).cornerIDs.get(0) + " " +
+     //        polygonNode.get(3).cornerIDs.get(1) + " " + polygonNode.get(3).cornerIDs.get(2));
+     //println("Polygon 4's points: " + polygonNode.get(4).cornerIDs.get(0) + " " +
+     //        polygonNode.get(4).cornerIDs.get(1) + " " + polygonNode.get(4).cornerIDs.get(2));
      
      
      /*SHOWS A SINGLE POLYGON*/
